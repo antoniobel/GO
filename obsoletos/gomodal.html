@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="css/estilo.css">
+</head>
+<body>
+
+<h2>Animated Modal with Header and Footer</h2>
+
+<!-- Trigger/Open The Modal 
+<button id="myBtn">Open Modal</button>
+-->
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+    <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Bienvenido a Guiñote Olympic</h2>
+    </div>
+    <div class="modal-body">
+      <p><label>Nombre:</label>
+        <input type="text" id="name" name="name">
+        <button class="button  button1" onclick="conectar()">Conectar</button>
+      </p>
+      <div class="column left" style="background-color:#ddd;">
+      <label>Jugadores:</label><br>
+        <select id="usuarios" onclick="incluir()" size="10">
+          <option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="fiat">Fiat</option>
+          <option value="audi">Audi</option><br>
+        </select>
+      </div>
+      <div class="column right" style="background-color:#ddd;">
+        <label>Pareja1:</label><br>
+        <select id="pareja1" onclick="excluir('pareja1')" size="2">
+        </select><br>
+        <label>Pareja2:</label><br>
+        <select id="pareja2" onclick="excluir('pareja2')" size="2">
+        </select><br>
+        Selecciona jugadores para formar las parejas. Los jugadores no seleccionados entrarán en la partida como espectadores.
+      </div>
+      <div class="centrar">
+        <button class="button  button1" onclick="comenzar()">Comenzar partida</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <h3>© Antonio Bel, 2020</h3>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+modal.style.display = "block"; // abrimos el diálogo
+
+// Get the button that opens the modal
+//var btn = document.getElementById("myBtn");
+
+var usuarios = document.getElementById("usuarios");
+var option = document.createElement("option");
+  option.text = "Kiwi";
+  usuarios.add(option);
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+//btn.onclick = function() {
+//  modal.style.display = "block";
+//}
+
+function conectar() {
+  var user = document.getElementById("usuarios").value;
+  console.log(user);
+}
+
+function incluir() {
+      var usuarios = document.getElementById("usuarios");
+  var user = usuarios.value;
+  console.log(user);
+  if (user != '') {
+    var index = usuarios.selectedIndex;
+    var option = document.createElement("option");
+      option.text = user;
+    var pareja1 = document.getElementById("pareja1");
+    console.log(pareja1.length);
+    if (pareja1.length < 2) {
+      pareja1.add(option);
+      usuarios.remove(index);
+    } else {
+      var pareja2 = document.getElementById("pareja2");
+      if (pareja2.length < 2) {
+        pareja2.add(option);
+        usuarios.remove(index);
+      }
+    } 
+  }
+}
+
+function excluir(selector) {
+    var pareja = document.getElementById(selector);
+    var user = pareja.value;
+    var index = pareja.selectedIndex;
+    var usuarios = document.getElementById("usuarios");
+    var option = document.createElement("option");
+    option.text = user;
+    usuarios.add(option);
+    pareja.remove(index);
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+</script>
+
+</body>
+</html>

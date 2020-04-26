@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>Guiñote online, solo para forofos de Guiñote Olympics</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <canvas id="canvas" width="600px" height="300px"></canvas>
+    </body>
+    
+    <script>
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        var img = new Image();
+
+        fullScreen();
+        ponerFondo();
+        ponerCarta();
+        var xfrom = 0;
+        var yfrom = 0;
+        var xto = 500;
+        var yto = 500;
+        moverCarta();
+
+        function fullScreen() {
+            canvas.height = window.innerHeight - 20;
+            canvas.width = window.innerWidth - 20;
+        }
+
+        function ponerFondo() {
+            var img = new Image();
+            img.src = 'paperGreen.png';
+            img.onload = function(){
+                // create pattern
+                var ptrn = context.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
+                context.fillStyle = ptrn;
+                context.fillRect(0, 0, canvas.width, canvas.height); // context.fillRect(x, y, width, height);
+            };
+        }
+
+        function ponerCarta() {
+            img.addEventListener('load', () => {
+                 context.drawImage(img, 10,20);
+            }, false);
+            img.src = 'esp40_1o.png';             
+        }
+
+        var deltax , deltay;
+        var x , y;
+        function moverCarta() {
+            context.drawImage(img, xfrom, yfrom);
+            deltax = Math.abs(xfrom - xto) / 100;
+            deltay = Math.abs(yfrom - yto) / 100;
+            x = xfrom;
+            y = yfrom;
+            window.requestAnimationFrame(draw);
+        }
+
+        function draw() {
+            x += deltax ;
+            y += deltay ;
+            console.log("loop " + x);
+            context.drawImage(img , x , y);
+            if (x < xto && y < yto) {
+                window.requestAnimationFrame(draw);
+            }
+        }
+    </script>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/estilo.css">
+<!--        <style>
+            .button {
+                background-color: #4CAF50; /* Green */
+                border: none;
+                border-radius: 6px;
+                color: white;
+                padding: 4px 8px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+                width: 95px;
+            }
+            .button1 {
+                background-color: white; 
+                color: black; 
+                border: 2px solid #4CAF50;
+            }
+            .button1:hover {
+                background-color: #4CAF50;
+                color: white;
+            }
+            </style> -->
+        <title>Guiñote Olympic</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- colyseus.js client -->
+        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
+        <script type="text/javascript" src="server/gobase.js"></script>
+        <script type="text/javascript" src="client/goGraficos.js"></script>
+    </head>
+    <body>
+        <div id="modalcante" class="modal2" >
+            <div id="divimage">
+            </div>
+    </div>
+
+        <p id="puntos"></p>
+        <button id="cante" class="button  button1" onclick="cantar()">Cantar   </button>
+        <button id="cambio7" class="button  button1" onclick="cambio7()">Cambiar 7</button>
+        <button id="salir" class="button  button1" onclick="salir()">Salir   </button>
+        <button id="ordenar" class="button  button1" onclick="ordenar(event)">Ordenar</button>
+        <canvas id="canvas" width="600px" height="300px"></canvas>
+        <script>
+            var ui = new UI();
+            var nombreJugador;
+            ui.canvas.fullScreen();
+            // Colocamos los botones en su posicion
+            posicionarBotones();
+            mostrarBotones();
+//            var canvas = new MiCanvas();
+
+//            var gbaraja = new GBaraja();
+            setTimeout(function(){ 
+//                ui.canvas.context().font = "50px serif";
+//                ui.canvas.context().fillText("Hola pepinillos", 100 , 200);
+/*                canvas.context().drawImage(gbaraja.get(0), 10,10);
+                canvas.context().drawImage(gbaraja.get(0), 10,210);
+                canvas.context().drawImage(gbaraja.get(0), 10,410);
+                canvas.context().drawImage(gbaraja.get(0), 10,610);
+                canvas.context().drawImage(gbaraja.get(0), 10,810);
+                canvas.context().drawImage(gbaraja.get(0), 10,1010);
+                console.log(canvas.ancho() + " " + canvas.alto());
+                canvas.context().drawImage(gbaraja.get(0) , 200 , canvas.alto() - gbaraja.alto());
+                canvas.context().drawImage(gbaraja.get(0) , canvas.ancho() - gbaraja.ancho() , canvas.alto() - gbaraja.alto());
+                console.log("canvas.height " +canvas.alto()/canvas.escala());
+                console.log("window.innerHeight " + window.innerHeight); */
+                var baraja = new Baraja();
+                baraja.barajar();
+                var jugador = ui.crearJugador("Antonio" , "abajo");
+                jugador.visible = true;
+                var jugador2 = ui.crearJugador("Hilario" , "izquierda");
+                var jugador3 = ui.crearJugador("Rafa" , "derecha");
+                var jugador4 = ui.crearJugador("Arribas" , "arriba");
+                ui.baza.nombres.push("Antonio");
+                ui.baza.nombres.push("Hilario");
+                ui.baza.nombres.push("Rafa");
+                ui.baza.nombres.push("Arribas");
+                nombreJugador = "Antonio";
+                haCantado( { valor: 20 , indexPalo: 3 , palo: 'Bastos' , jugador: "Hilario"});
+                var i = 0;
+                ui.jugadores[0].paloCantes.push(0);
+                ui.jugadores[0].paloCantes.push(0);
+                ui.jugadores[1].paloCantes.push(1);
+                ui.jugadores[2].paloCantes.push(2);
+                ui.jugadores[3].paloCantes.push(3);
+                ui.jugadores[3].paloCantes.push(-1);
+                var id = setInterval(function(){
+                    jugador.cartas.push(baraja.cogerCarta());
+                    jugador2.cartas.push(baraja.cogerCarta());
+                    jugador3.cartas.push(baraja.cogerCarta());
+                    jugador4.cartas.push(baraja.cogerCarta());
+                    if ( i < 4) {
+                        ui.baza.cartas.push(baraja.cogerCarta());
+                    }
+                    ui.dibujar();
+                    i++;
+                    if (i === 6) {
+                        clearInterval(id);
+                    }
+                } , 500); 
+                ui.mazo.triunfo = baraja.cogerCarta();
+                ui.mazo.numCartas = 16; 
+                ui.ganadas.ganadas[0] = 8;
+                ui.ganadas.ganadas[1] = 4;
+                ui.dibujar(); 
+                jugador.ponerTurno();
+                    setTimeout(function() {
+                        jugador.quitarTurno();
+                } , 10000);
+            }, 1000);
+
+            var stage= document.getElementById('canvas');
+            stage.addEventListener('click', canvasClicked, false);
+
+function canvasClicked(e) {
+    var miclick = ui.click(e.x , e.y);
+    console.log(miclick);
+}
+
+function cantar() {
+    console.log("Se ha pulsado cantar");
+}
+
+function haCantado(data) {
+    var imagen;
+    if (data.valor === 40) {
+        imagen  = this.ui.baraja.cuarenta; 
+    } else {
+        if (data.palo == '') {
+            imagen  = this.ui.baraja.veinte; 
+        } else {
+            imagen = this.ui.baraja.cantes[data.indexPalo];
+        }
+    }
+    imagen.style.position = "absolute";
+    var indice = this.ui.indice(data.jugador);
+    var punto = this.ui.jugadores[indice].posicionarCante();
+    console.log("x " + punto.x + " y: " + punto.y);
+    imagen.style.left = punto.x + "px";
+    imagen.style.top =  punto.y + "px";
+    document.getElementById("divimage").appendChild(imagen);
+    document.getElementById("modalcante").style.display = "block";
+    this.ui.jugadores[indice].paloCantes.push(data.indexPalo);
+    if (data.jugador === nombreJugador) {
+        document.getElementById("cante").disabled = true;
+    }
+    this.ui.dibujar();
+    if (data.valor === 40) {
+        this.ui.jugadores[indice].paloCantes.push(data.indexPalo);
+    }
+    setTimeout(function() {
+        document.getElementById("modalcante").style.display = "none";
+        document.getElementById("divimage").removeChild(imagen);
+        haCantado( { valor: 20 , indexPalo: -1 , palo: '' , jugador: "Antonio"});
+    } , 3000);
+}
+
+function posicionarBotones() {
+    console.log("Posicionar botones");
+    var botonCante = document.getElementById("cante");
+    botonCante.style.position = "absolute";
+    var x = Math.floor(window.innerWidth - 150);
+    var y = Math.floor(window.innerHeight - 70);
+    botonCante.style.left = Math.floor(window.innerWidth - 110) + "px";
+    botonCante.style.top =  Math.floor(window.innerHeight - 70) + "px";
+    var botoncambio7 = document.getElementById("cambio7");
+    botoncambio7.style.position = "absolute";
+    botoncambio7.style.left = Math.floor(window.innerWidth - 110) + "px";
+    botoncambio7.style.top =  Math.floor(window.innerHeight - 120) + "px";
+    var salir = document.getElementById("salir");
+    salir.style.position = "absolute";
+    salir.style.left = Math.floor(window.innerWidth - 150) + "px";
+    salir.style.top =  Math.floor(30) + "px";     
+    botonCante.style.display = "none"; 
+    botoncambio7.style.display = "none";
+    salir.style.display = "none";
+
+    var ordenar = document.getElementById("ordenar");
+    ordenar.style.position = "absolute";
+    ordenar.style.left = Math.floor(window.innerWidth - 210) + "px";
+    ordenar.style.top =  Math.floor(window.innerHeight - 70) + "px";
+    ordenar.style.display = "none";
+
+    var puntos = document.getElementById("puntos");
+    puntos.style.position = "absolute";
+    puntos.style.left = "10px";
+    puntos.style.top =  "10px";   
+    puntos.style.display = "none";
+    console.log("Fin Posicionar botones");
+}
+
+function mostrarBotones() {
+    document.getElementById("cante").style.display = "block"; 
+    document.getElementById("cambio7").style.display = "block";
+    document.getElementById("salir").style.display = "block";
+    document.getElementById("ordenar").style.display = "block";
+}
+
+        </script>
+    </body>
+</html>

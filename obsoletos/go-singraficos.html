@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <title>Guiñote online, solo para forofos de Guiñote Olympics</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- colyseus.js client -->
+        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
+        <script type="text/javascript" src="server/gobase.js"></script>
+    </head>
+    <body>
+        <h1> Guiñote sin gráficos para forofos </h1>
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name">
+        <button onclick="conectar()">Conectar</button>
+        <button onclick="comenzar()">Comenzar</button><br>
+        <label id="pareja">Tu pareja es: </label><br>
+        <label id="triunfo">Triunfo</label><br>
+        <label id="ronda">Ronda</label>
+        <label id="turno">Turno de juego de: </label><br>
+        <label id="anterior">Ronda anterior ganada por: </label><br>
+        <label id="eventos">Eventos: </label><br>
+        <label id="mesa">Cartas en la mesa: </label><br>
+        <label >Tus cartas: </label>
+        <button id="c1" onclick="juegaCarta(1)">?</button>
+        <button id="c2" onclick="juegaCarta(2)">?</button>
+        <button id="c3" onclick="juegaCarta(3)">?</button>
+        <button id="c4" onclick="juegaCarta(4)">?</button>
+        <button id="c5" onclick="juegaCarta(5)">?</button>
+        <button id="c6" onclick="juegaCarta(6)">?</button>
+        <button id="ordenar" onclick="ordenar()">Ordenar</button><br>
+        <button id="cantar" onclick="cantar()">Cantar</button>
+        <button id="cambiar" onclick="cambiar()">Cambiar 7</button>
+        <div id="messages"></div>
+        <script type="text/javascript" src="client/goClient.js"></script>
+    </body>
+</html>

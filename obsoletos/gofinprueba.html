@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <title>Guiñote Olympic</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="css/estilo.css">
+        <!-- Módulos javascript -->
+        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
+        <script type="text/javascript" src="server/gobase.js"></script>
+        <script type="text/javascript" src="client/goGraficos.js"></script>
+    </head>
+    <body>
+        <!-- Ventana emergente -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="close">&times;</span>
+                    <h2>Bienvenido a Guiñote Olympic</h2>
+                </div>
+                <div class="modal-body">
+                    <p><label>Nombre:</label>
+                        <input type="text" id="name" name="name">
+                        <button id=conectar class="button  button1" onclick="conectar()">Conectar</button>
+                    </p>
+                    <div class="column left" style="background-color:#ddd;">
+                        <label>Jugadores:</label><br>
+                        <select id="usuarios" onclick="incluir()" size="10"></select>
+                    </div>
+                    <div class="column right" style="background-color:#ddd;">
+                        <label>Pareja 1:</label><br>
+                        <select id="pareja1" onclick="excluir('pareja1')" size="2"></select><br>
+                        <label>Pareja 2:</label><br>
+                        <select id="pareja2" onclick="excluir('pareja2')" size="2"></select><br>
+                        Selecciona jugadores para formar las parejas. Los jugadores no seleccionados entrarán en la partida como espectadores.
+                    </div>
+                    <div class="centrar">
+                        <button id=comenzar class="button  button1" onclick="comenzar()" disabled>Comenzar partida</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <h3>© Antonio Bel, 2020</h3>
+                </div>
+            </div>    
+        </div>
+        <!-- Ventana emergente final de partida -->
+        <div id="modalfin" class="modal" >
+            <div class="modal-content" style="width: 30%">
+                <div class="modal-header">
+                    <span id="close2" class="close" onclick="close2()">&times;</span>
+                    <h2>Resultados de la partida</h2>
+                </div>
+                <div class="modal-body">
+                    <p id="linea1"></p>
+                    <p id="linea2"></p>
+                    <p id="linea3"></p>    
+                </div>
+        </div>
+        <!-- Canvas y botones del juego (superpuestos en el canvas) -->
+        <p id="puntos">Juan y Pedro: 30 buenas<br>Luis y Antonio: 15 malas</p>
+        <button id="cante" class="button  button1" onclick="cantar()">Cantar   </button>
+        <button id="cambio7" class="button  button1" onclick="cambio7()">Cambiar 7</button>
+        <button id="salir" class="button  button1" onclick="salir()">Salir   </button>
+        <canvas id="canvas" width="600px" height="300px"></canvas>
+        <script>
+
+        var puntos = document.getElementById("puntos");
+        puntos.style.position = "absolute";
+        puntos.style.left = "10px";
+        puntos.style.top =  "10px";   
+        var partidaTerminada = {};
+        partidaTerminada.parejas = [];
+        partidaTerminada.puntos = [];
+        partidaTerminada.marcador = [];
+        partidaTerminada.parejas.push("Luis y Pedro");
+        partidaTerminada.parejas.push("Juan y Rodolfo");
+        partidaTerminada.puntos.push(85);
+        partidaTerminada.puntos.push(45);
+        partidaTerminada.hayVuelta = false;
+        partidaTerminada.ganadores = "Luis y Pedro";
+        partidaTerminada.marcador.push(2);
+        partidaTerminada.marcador.push(0);
+        partidaTerminada.finCoto = true;
+        dialogoFinPartida();
+
+function dialogoFinPartida() {
+    if (partidaTerminada.hayVuelta) {
+        var i;
+        for (i = 0; i < 2; i++) {
+            if (partidaTerminada.puntos[i] > 50) {
+                partidaTerminada.puntos[i] = (partidaTerminada.puntos[i] - 50) + " buenas";
+            } else {
+                partidaTerminada.puntos[i] = partidaTerminada.puntos[i] + " malas";
+            } 
+        }
+        document.getElementById("linea1").innerHTML  = partidaTerminada.parejas[0] + ": " + partidaTerminada.puntos[0];
+        document.getElementById("linea2").innerHTML  = partidaTerminada.parejas[1] + ": " + partidaTerminada.puntos[1];
+        document.getElementById("linea3").innerHTML  = "Hay partida de vuelta" ;
+    } else {
+        if (partidaTerminada.finCoto) {
+            document.getElementById("linea1").innerHTML  = partidaTerminada.ganadores + " han ganado la partida y el coto. Marcador final:";
+        } else {
+            document.getElementById("linea1").innerHTML  = partidaTerminada.ganadores + " han ganado la partida. El marcador está así:" ;
+        }
+        document.getElementById("linea2").innerHTML  = partidaTerminada.parejas[0] + ": " + partidaTerminada.marcador[0];
+        document.getElementById("linea3").innerHTML  = partidaTerminada.parejas[1] + ": " + partidaTerminada.marcador[1];
+    }
+    document.getElementById("modalfin").style.display = "block"; // abrimos el diálogo fin partida
+}
+function close2() {
+    document.getElementById("modalfin").style.display = "none"; // cerramos el diálogo fin partida
+}
+        </script>        
+    </body>
+</html>

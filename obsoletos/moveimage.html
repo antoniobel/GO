@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Image Animation Test</title>
+        <meta charset="UTF-8">
+        <script>
+            const BLUE_URL = "http://worldartsme.com/images/car-top-view-clipart-1.jpg";
+            const DESIRED_ROTATION_SPEED = Math.PI / 2;
+
+            var raf;
+            var blueCar;
+            var ctx;
+            var lastTick = 0;
+            var position = { x:0, y:0, angle:0 };
+            var center = { x:0, y:0 };
+
+            function getRaf() {
+                return window.requestAnimationFrame ||
+                    window.webkitRequestAnimationFrame || 
+                    window.mozRequestAnimationFrame || 
+                    window.oRequestAnimationFrame || 
+                    window.msRequestAnimationFrame ||
+                    function(callback) {
+                        window.setTimeout(callback, 1000 / 60);
+                    };
+            }
+
+            function clearContext(fillColor) {
+                ctx.fillStyle = fillColor;
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+
+            function update(gameTime) {
+                position.angle += (gameTime.diff / 1000) * DESIRED_ROTATION_SPEED;
+                if (position.angle > (Math.PI * 2)) {
+                    position.angle -= Math.PI * 2;
+                }
+
+                position.x = center.x + (Math.cos(position.angle) * 180);
+                position.y = center.y + (Math.sin(position.angle) * 140);
+            }
+
+            function draw(gameTime) {
+                clearContext('#101010');
+                var drawHeight = 100;
+                var drawWidth = drawHeight * blueCar.width / blueCar.height;
+                ctx.drawImage(blueCar, 0, 0, blueCar.width, blueCar.height, position.x - (drawWidth / 2), position.y - (drawHeight / 2), drawWidth, drawHeight);
+            }
+
+            function loop(tick) {
+                var diff = tick - lastTick;
+                lastTick = tick;
+                var gameTime = { tick:tick, lastTick:lastTick, diff:diff };
+                update(gameTime);
+                draw(gameTime);
+                raf(loop);
+            }
+
+            function init(event) {
+                console.log(BLUE_URL);
+                var canvas = document.getElementById('canvas');
+                canvas.width = 800;
+                canvas.height = 600;
+                center.x = canvas.width / 2;
+                center.y = canvas.height / 2;
+                position.x = center.x;
+                position.y = center.y;
+                ctx = canvas.getContext('2d');
+                raf = getRaf();
+                blueCar = new Image();
+                blueCar.addEventListener('load', function(event) {
+                    startAnimation();
+                }, false);
+                blueCar.src = BLUE_URL;
+            }
+
+            function startAnimation() {
+                raf(loop);
+            }
+
+            window.addEventListener('load', init, false);
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas"><h1>Canvas not supported</h1></canvas>
+    </body>
+</html>

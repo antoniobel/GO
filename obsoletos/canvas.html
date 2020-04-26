@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <style>
+            div.fixed {
+              position: absolute;
+              top: 50px;
+              left: 50px;
+            }
+        </style>
+        <title>Guiñote online, solo para forofos de Guiñote Olympics</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- colyseus.js client -->
+    </head>
+    <body>
+        <canvas id="canvas" width="600px" height="300px"></canvas>
+        <div class="fixed">
+            <button id="c1" onclick="pulsado()">Boton</button>
+        </div>
+    </body>
+    
+    <script>
+        var canvas = document.getElementById("canvas");
+//        canvas.height = window.innerHeight - 20;
+//        canvas.width = window.innerWidth - 20;
+        context = canvas.getContext("2d");
+        img = new Image();
+
+        img.src = 'paperGreen.png';
+
+        img.onload = function(){
+            // create pattern
+            var ptrn = context.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
+            context.fillStyle = ptrn;
+            context.fillRect(0, 0, canvas.width, canvas.height); // context.fillRect(x, y, width, height);
+        };
+        var visible = true;
+
+        function pulsado() {
+            console.log("Visible es " + visible);
+            canvas = document.getElementById("canvas");
+            if (visible) {
+                canvas.style.visibility='hidden';
+                visible = false;
+            } else {
+                canvas.style.visibility='visible';
+                visible=true;
+            }
+        }
+    </script>
+</html>

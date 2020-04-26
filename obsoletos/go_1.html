@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <title>Guiñote online, solo para forofos de Guiñote Olympics</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- colyseus.js client -->
+        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
+        <script type="text/javascript" src="server/gobase.js"></script>
+    </head>
+    <body>
+        <h1> Guiñote sin gráficos para forofos </h1>
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name">
+        <button onclick="conectar()">Conectar</button>
+        <button onclick="comenzar()">Comenzar</button><br>
+        <label id="triunfo">Triunfo</label>
+        <label id="ronda">Ronda</label><br>
+        <button id="c1" onclick="carta1()">?</button>
+        <button id="c2" onclick="carta2()">?</button>
+        <button id="c3" onclick="carta3()">?</button>
+        <button id="c4" onclick="carta4()">?</button>
+        <button id="c5" onclick="carta5()">?</button>
+        <button id="c6" onclick="carta6()">?</button><br>
+        <button id="cantar" onclick="cantar()">Cantar</button>
+        <button id="cambiar" onclick="cambiar()">Cambiar 7</button>
+        <div id="messages"></div>
+        
+        <script>
+            var host = window.document.location.host.replace(/:.*/, '');
+            var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+            var room;
+            var lastAction;
+            
+            function mostrar(msg) {
+                p = document.createElement("p");
+                p.innerText = msg;
+                document.querySelector("#messages").appendChild(p);    
+            }
+
+            function conectar() {
+                var vnombre = document.getElementById("name").value; 
+                client.joinOrCreate("go_room" , { nombre: vnombre}).then(room_instance => {
+                    room = room_instance; // para poder manejarla fuera del then
+                
+                    room.onMessage(function(message) {
+                        console.log(message);
+                        if (message.action != null) {
+                            lastAction = message.action;
+                        }
+                        if (message.message != null) {
+                            mostrar(message.message);
+                        }
+                        if (message.prueba != null) {
+                            mostrar(message.data);
+                        }
+//                        var carta = new Carta(1);
+//                        console.log(carta.toString());
+//                        document.getElementById("c1").firstChild.data = carta.toString();
+                    });
+                
+                    room.state.onChange = function (changes) {
+                        changes.forEach(change => {
+                            if (change.field === "action") {
+                                lastAction = change.value;
+                                console.log("Recibo acción " + lastAction);
+                            }
+                        });
+                    };
+                    
+                    room.state.players.onAdd = function (player, sessionId) {
+                        mostrar("Se ha conectado: " + player.nombre);
+                    };
+                    
+                    room.state.players.onChange = function(player , key) {
+                        if (lastAction === "Reparto cartas" && player.nombre === vnombre) {
+                            ponerCartas(player);
+                        }
+                        console.log("recibo " + player.cartas + " para " + player.nombre);
+/*                        if (player.nombre === vnombre) {
+                            console.log("recibo " + player.cartas + " para " + player.nombre);
+//                            document.getElementById("c1").firstChild.data = player.cartas[0];
+                            document.getElementById("c2").firstChild.data = player.cartas[1];
+                            document.getElementById("c3").firstChild.data = player.cartas[2];
+                            document.getElementById("c4").firstChild.data = player.cartas[3];
+                            document.getElementById("c5").firstChild.data = player.cartas[4];
+                            document.getElementById("c6").firstChild.data = player.cartas[5];
+                        } */
+                    };                    
+                });                
+            }
+            
+            function comenzar() {
+                room.send({ action: "ComienzaPartida" });
+            }
+            
+            function ponerCartas(player) {
+                var i , ele, carta;
+                for (i = 1; i <= 6; i++) {
+                    if (player.cartas[i-1] != null) {
+                        ele = "c" + i;
+                        carta = new Carta(player.cartas[i-1]);
+                        document.getElementById(ele).firstChild.data = carta.toString();
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
