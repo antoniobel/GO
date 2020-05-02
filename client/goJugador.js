@@ -54,8 +54,10 @@ canvasClicked(e) {
     if (this.turno) {
         var miclick = this.ui.click(e.x , e.y);
         if (miclick != null) {
-            console.log("Se ha pulsado " + miclick.carta);
-            this.room.send({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
+            if (miclick.nombre === this.nombreJugador && miclick.carta != null) { 
+                console.log("Se ha pulsado " + miclick.carta);
+                this.room.send({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
+            }
         }   
     }
 }
