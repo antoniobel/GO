@@ -235,9 +235,11 @@ class GoGame {
                         this.rondaTerminada();
                     } , 3500); 
                 } else {
-                    var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
-                    this.enviarEvento('' , { action: "Turno", data: nombreJugador });
-                    this.enviarEvento(nombreJugador , { action: "Juega" });
+                    this.handler.clock.setTimeout(() => {
+                        var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
+                        this.enviarEvento('' , { action: "Turno", data: nombreJugador });
+                        this.enviarEvento(nombreJugador , { action: "Juega" });
+                    } , 800);
                 }
             } else {
                 // El jugador ha tirado una carta no válida (en el arrastre)
