@@ -41,6 +41,31 @@ class GoGame {
     };
     
     /**
+     * Incorpora al juego un espectador una vez que la partida ha comenzado.
+     * @param {*} nombre - nombre del espectador que se incorpora.
+     */
+    incorporar(nombre) {
+        var nombres = [];
+        this.jugadores.forEach(jugador => {
+            nombres.push(jugador.nombre);
+        });
+        this.enviarEvento(nombre , { action: "Jugadores" , data: nombres});
+
+        this.enviarEvento(nombre , { action: "ComienzaPartida"});
+        this.enviarEvento(nombre , { action: "Parejas", data: [ [this.jugadores[0].nombre , this.jugadores[2].nombre ] , 
+                                                            [ this.jugadores[1].nombre , this.jugadores[3].nombre ] ] });
+        if (this.vueltas) {
+            this.enviarEvento(nombre , { action: "NuevaPartida", data: {vuelta: this.vueltas ,  
+                                                            parejas: this.nombresPareja , 
+                                                            puntos: this.puntos }});
+        } else {
+            this.enviarEvento(nombre , { action: "NuevaPartida", data: {vuelta: this.vueltas }});
+        }
+        this.snapshot(nombre);
+        this.enviarEvento('' , { action: "NuevaConexion", data: nombre});
+    }
+
+    /**
      * Recibe los mensajes que envian los jugadores 
      * @param nombre - jugador que envia el mensaje 
      * @param data - mensaje
@@ -68,6 +93,10 @@ class GoGame {
         if (mensaje.action === "PartidaCancelada") {
             this.gameStarted = false;
             this.enviarEvento('' , { action: "PartidaCancelada" , data: mensaje.data});
+            this.handler.disconnect(); // Desconecta todos los usuarios
+        }
+        if (mensaje.action === "Snapshot") {
+            this.snapshot(mensaje.data);
         }
     }
     
@@ -127,7 +156,7 @@ class GoGame {
             this.puntos[1] = 0;
         }      
         //determinar orden de juego
-        if (this.marcador[0] === 0 && this.marcador[1] === 0) { // es la primera partida del coto
+        if (this.marcador[0] === 0 && this.marcador[1] === 0 && !this.vueltas) { // es la primera partida del coto (y no es de vueltas)
             this.orden = [];
             this.fijarOrden(Math.floor(Math.random()*4)); // el primer jugador al azar.
         } else { // empezamos partida pero no es la primera. hay que correr turno
@@ -135,8 +164,7 @@ class GoGame {
             this.orden.shift(); // quitamos el primer elemento
             this.orden.push(cero); // y lo ponermos el último.
         }
-        console.log("orden");
-        console.log(this.orden);
+        console.log("orden" , this.orden);
         //repartir cartas Se reparten de 3 en 3 y la acción se decala time para dar tiempo a que el 
         // cliente vea como se dan las cartas.
         var time = this.repartirCartas();
@@ -158,6 +186,7 @@ class GoGame {
             var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
             this.enviarEvento('' , { action: "Turno", data: nombreJugador });
             // Enviar orden de jugar al jugador con el turno
+            this.errorCounter = 0; // controlador para errores de turno de juego
             this.enviarEvento(nombreJugador , { action: "Juega" });           
         } , time); 
     }
@@ -205,6 +234,7 @@ class GoGame {
     cartaJugada(nombre , carta) {
         var index = this.getJugadorIndex(nombre);
         if (index === this.orden[this.turno]) { // compruebo que el jugador tiene el turno
+            this.errorCounter = 0; 
             if (this.cartaValida(carta , index)) { // ver si la carta es valida
                 var i; // elimino la carta del jugador
                 for (i=0 ; i< this.jugadores[index].cartas.length; i++) {
@@ -246,6 +276,11 @@ class GoGame {
             }
         } else {
             console.log(`${nombre} ha jugado fuera de turno`);
+            this.errorCounter++;
+            if (errorCounter > 5) { // Muchos errores de turno. Enviamos snapshot para que se sincronice.
+                this.errorCounter = 0;
+                this.snapshot(nombre);
+            }
         }
     }
 
@@ -336,6 +371,7 @@ class GoGame {
             } , 6000);
         } else {
             this.gameStarted = false;
+            this.handler.disconnect(); // Desconectamos a todos
         }
     }
 
@@ -347,7 +383,7 @@ class GoGame {
         if (this.indiceGanador < 0) return;
         var secuencia = 0; // Para indicar los cantes multiples
         if (this.indicePareja(index) === this.indicePareja(this.indiceGanador)) {
-            var palo = this.jugadores[index].cantar();
+            var palo = this.jugadores[index].cantar(this.ronda);
             while (palo >= 0) {
                 secuencia++;
                 var valor = 20;
@@ -368,7 +404,7 @@ class GoGame {
                                                                     }});
                 this.guardaLogCante('N' , index , valor , palo);
                 this.puntos[this.indicePareja(index)] += valor;
-                palo = this.jugadores[index].cantar();
+                palo = this.jugadores[index].cantar(this.ronda);
             }
             // Comunicar puntos. Si vamos de vueltas comprobar si ha terminado la partida. si es asi rutina de ganador
             this.enviarEvento('' , { action: "Puntos" , data: {parejas: this.nombresPareja , puntos: this.puntos}});
@@ -401,8 +437,10 @@ class GoGame {
 
     enviarEvento(nombre  , mensaje) {
         if (this.handler != null) {
-            console.log("Enviar evento: -" + nombre + "-" + mensaje.action);
-            console.log(mensaje.data);
+            console.log("Enviar evento: ->" , nombre , "<-" , mensaje.action);
+            if ('data' in mensaje) {
+                console.log(mensaje.data);
+            }
             if (nombre == '') { // No hay nombre. hacemos un sendAll
                 this.handler.sendAll(mensaje);
             } else {
@@ -425,7 +463,7 @@ class GoGame {
                     carta = this.baraja.cogerCarta();
                     this.jugadores[indice].tomaCarta(carta);
                     this.handler.clock.setTimeout(this.enviar1Carta , time , this , this.jugadores[indice].nombre , carta.id); 
-                    time += 600;
+                    time += 400;
                 }
             }
         }
@@ -777,15 +815,56 @@ class GoGame {
                 '.' + d.getSeconds() + '_';
         for (i = 0; i < 4; i++) {
             path = 'logs/' + nombre + this.jugadores[i].nombre + '.txt';
+            console.log('Path:' , path);
             todo = '';
             this.log[i].forEach(linea => {
                 todo += linea + os.EOL;
             });
             fs.writeFile(path, todo, function (err) {
                 if (err) throw err;
-                console.log('fichero salvado!' + path);
+                console.log('fichero salvado');
             });
         }        
+    }
+
+    snapshot(nombre) {
+        if (this.triunfo == null) {
+            this.handler.clock.setTimeout(() => {
+                this.snapshot(nombre);
+            } , 1000);  
+            return;          
+        }
+        var xnombres = [];
+        var xcartas = [];
+        var xcantes = [];
+        var nCartas = this.baraja.cartas.length;
+//        this.baraja.cartas.length > 0 ? nCartas = this.baraja.cartas.length - 1 : nCartas = 0;
+        var xmazo = { triunfo: this.triunfo.id , numCartas : nCartas};
+        this.jugadores.forEach(jugador => {
+            xnombres.push(jugador.nombre);
+            var cartasJugador = [];
+            jugador.cartas.forEach(carta => {
+                cartasJugador.push(carta.id);
+            }) 
+            xcartas.push(cartasJugador);
+            xcantes.push(jugador.cantesCantados);
+        });
+        var i = 0;
+        var bazaCartas = [] , bazaNombres = [];
+        this.baza.forEach(carta => {
+            bazaCartas.push(carta.id);
+            bazaNombres.push(this.jugadores[this.orden[i]].nombre);
+            i++;
+        })
+        var xbaza = {cartas: bazaCartas, nombres: bazaNombres};
+        var xturno = this.jugadores[this.orden[this.turno]].nombre;
+        var xganadas = [];
+        xganadas.push({nombre: this.jugadores[0].nombre, numCartas: this.cartasRecogidas[0].length});
+        xganadas.push({nombre: this.jugadores[1].nombre, numCartas: this.cartasRecogidas[1].length});
+        var xpuntos = {parejas: this.nombresPareja , puntos: this.puntos, vueltas: this.vueltas};
+        var data = { nombres: xnombres , cartas : xcartas , baza: xbaza , mazo: xmazo , turno: xturno , 
+                     ganadas: xganadas , cantes: xcantes, puntos: xpuntos};
+        this.enviarEvento(nombre , { action: 'Snapshot' , data: data });
     }
 }
 exports.GoGame = GoGame;

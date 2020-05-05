@@ -68,8 +68,9 @@ class Handler extends colyseus.Room {
             this.state.createPlayer(client.sessionId , options.nombre);
             console.log('Cliente ' + options.nombre + ' conectado. sessionId: ' + client.sessionId);
             this.sendOne(options.nombre , { message: "Bienvenido " + options.nombre});
-            if (this.game.gameStarted) {
-                this.send(client , { message: "La partida ya ha comenzado. Tendrás que esperar." + options.nombre , code: 2 });
+            if (this.game.gameStarted) { // Si la partida ha comenzado, incorporar al juego.
+                this.game.incorporar(options.nombre);
+//                this.send(client , { message: "La partida ya ha comenzado. Tendrás que esperar." + options.nombre , code: 2 });
             }
             this.broadcast({conexiones: this.state.players});        
         } else { // si lo hay, lo echamos.
@@ -86,8 +87,17 @@ class Handler extends colyseus.Room {
     }
 
     onMessage (client, data) {
-        console.log("handler received message from", client.sessionId, ":", data);
-        this.game.messageReceiver(this.getName(client.sessionId) , data);
+        if ('echo' in data) {
+            if ('action' in data.echo) {
+                console.log("Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.action);
+                console.log(data.echo.data);
+            } else {
+                console.log("Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.data);
+            }
+        } else {
+            console.log("Mensaje recibido", this.getName(client.sessionId) , client.sessionId, ":", data);
+            this.game.messageReceiver(this.getName(client.sessionId) , data);
+        }
     }
 
     onDispose () {

@@ -93,7 +93,7 @@ class Baraja {
     }
     
 /*    barajar() {
-//        var siete = this.cartas[6];
+        var siete = this.cartas[6];
         var sota1 = this.cartas[7];
         var rey1 = this.cartas[9];
 //        var sota2 = this.cartas[17];
@@ -102,10 +102,12 @@ class Baraja {
 //        this.cartas.splice(17,1);
         this.cartas.splice(9,1);
         this.cartas.splice(7,1);
+        this.cartas.splice(6,1);
 //        this.cartas.splice(6,1);
 //        this.cartas.unshift(siete);
         this.cartas.unshift(sota1);
         this.cartas.unshift(rey1);
+        this.cartas.push(siete);
 //        this.cartas.unshift(rey2);
 //        this.cartas.splice(12 , 0 , sota2);
     } */
@@ -211,7 +213,7 @@ class Jugador {
         this.calcularCantes();
         var i;
         for (i = 0; i < 4; i++) {
-            if (this.cantes[i] - this.cantesCantados[i] > 0) {
+            if (this.cantes[i] - Math.abs(this.cantesCantados[i]) > 0) {
                 return true;
             }
         }
@@ -221,15 +223,15 @@ class Jugador {
      * Canta el primer cante que tenga pendiente. Sólo hace un cante. si hay más hay que volver a invocar el método.
      * Devuelve el palo que ha cantado. Si no tiene nada para cantar devuelve -1; 
      */
-    cantar() {
+    cantar(ronda) {
         var pendientes = this.cantesPendientes();
         if (!pendientes) {
             return -1;
         }
         var i;
         for (i = 0; i < 4; i++) {
-            if (this.cantes[i] - this.cantesCantados[i] > 0) {
-                this.cantesCantados[i] = 1;
+            if (this.cantes[i] - Math.abs(this.cantesCantados[i]) > 0) {
+                (ronda < 5) ? this.cantesCantados[i] = 1 : this.cantesCantados[i] = -1;
                 return i;
             }
         }

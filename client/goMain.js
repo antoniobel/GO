@@ -1,4 +1,9 @@
 /*
+ * Copyright (C) 2020 Antonio Bel Puchol
+ */
+"use strict";
+
+/*
  * Variables globales
  */
 var room;
@@ -10,6 +15,9 @@ var usuariosConectados = []; // Todos los usuarios conectados. Debe coincidir co
 /* Programa principal */
 var ui = new UI();
 var conectado = false;
+shortcut.add("Ctrl+X",function() {
+	requestSnapshot();
+});
 posicionarBotones();
 abrirDialogoInicio();
 
@@ -161,6 +169,7 @@ function conectar() {
         conectado = true;              
         room.onMessage(function(message) {
             console.log(message);
+            room.send({echo: message}); // Funcion eco. Mantener para verificar el log en el servidor. 
             if ('code' in message) {
                 if (message.code === 1) { // nombre repetido. hay que desconectarse.
                     nombreRepetido();
@@ -284,8 +293,10 @@ function botonno() {
  */
 function close2() {
     document.getElementById("modalfin").style.display = "none"; // cerramos el diálogo fin partida
-    if (manejador.partidaTerminada.finCoto) {
-        room.leave(); // Dejamos la room para evitar problemas de reinicio. 
+    if (manejador.partidaTerminada.finCoto) { // Al final del coto el servidor desconecta a todos. Limpiamos selects y empezamos.
+        vaciaSelect(document.getElementById("usuarios"));
+        vaciaSelect(document.getElementById("pareja1"));
+        vaciaSelect(document.getElementById("pareja2"));
         abrirDialogoInicio();
     }
 }
@@ -329,4 +340,8 @@ function partidaComenzada() {
     setTimeout(function() {
         document.getElementById("modalmsg").style.display = "none";
     } , 2000);                                
+}
+
+function requestSnapshot() {
+    room.send({ action: "Snapshot" , data: nombreJugador});
 }

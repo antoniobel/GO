@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2020 Antonio Bel Puchol
+ */
 "use strict";
 
 /**
@@ -723,6 +726,7 @@ class UI {
      * @param {*} carta - Carta que se mueve
      */
     mueveMazoJugador(nombre, carta) {
+        console.log('mueveMazoJugador' , nombre, carta);
         var desde = this.mazo.puntoMueve();
         var indice = this.indice(nombre);
         var hasta = this.jugadores[indice].puntoMueve(this.jugadores[indice].cartas.length); // añadimos al final
@@ -771,7 +775,7 @@ class UI {
      * @param {} animacion 
      */
     callbackJugadorBaza(animacion) {
-        console.log("callbackMazoJugador" , animacion.xcarta ,animacion.xindice);
+        console.log("callbackJugadorBaza" , animacion.xnombre ,animacion.xcarta);
         ui.baza.cartas.push(animacion.xcarta);
         ui.baza.nombres.push(animacion.xnombre);
     }

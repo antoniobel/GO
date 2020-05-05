@@ -43,11 +43,8 @@ procesaAction(action, data) {
         document.getElementById("myModal").style.display = "none";
         document.getElementById("modalfin").style.display = "none";
         document.getElementById("ordenar").disabled = false;
-        console.log("Voy a fullScreen");
         this.ui.canvas.fullScreen();
-        console.log("Voy a crear botones");
         mostrarBotones();
-        console.log("Voy a init");
         this.ui.initCompleto();
         return;
     }
@@ -78,7 +75,7 @@ procesaAction(action, data) {
         this.ui.jugadores[index].ponerTurno();
     }
     if (action === "Juega") {
-        this. turno = true;
+        this.turno = true;
     }
     if (action === "CartaJugada") {
         var carta = new Carta(data.carta);
@@ -134,13 +131,31 @@ procesaAction(action, data) {
         document.getElementById("msg").innerHTML =  "La partida ha sido cancelada por " + data;
         document.getElementById("modalmsg").style.display = "block"; // abrimos el diálogo
         setTimeout(function() {
+            this.ui.canvas.fullScreen();
+            vaciaSelect(document.getElementById("usuarios"));
+            vaciaSelect(document.getElementById("pareja1"));
+            vaciaSelect(document.getElementById("pareja2"));
+            conectado = false;
             document.getElementById("modalmsg").style.display = "none"; 
             abrirDialogoInicio();
         } , 3000);
     }
     if (action === "NoCanteCambio") {
         document.getElementById("cambio7").disabled = true;
-        document.getElementById("cante").disabled = true;    }
+        document.getElementById("cante").disabled = true;    
+    }
+    if (action === "Snapshot") {
+        this.procesaSnapshot(data);
+    }
+    if (action === "NuevaConexion") {
+        if (data !== this.nombreJugador) {
+            document.getElementById("msg").innerHTML =  data + " se ha conectado a la partida como espectador";
+            document.getElementById("modalmsg").style.display = "block"; // abrimos el diálogo
+            setTimeout(function() {
+                document.getElementById("modalmsg").style.display = "none"; 
+            } , 3000);   
+        }
+    }
 }
 
 nuevaPartida(data) {
@@ -169,14 +184,13 @@ ponerPuntos(data) {
 }
 
 cartaJugada(nombre , carta) {
+    console.log('cartajugada' , nombre , carta);
     var indice = this.ui.indice(nombre);
     var jugador = this.ui.jugadores[indice];
     // quitar la carta y la zona
     var i;
-    console.log('cartajugada' , jugador , carta);
     for (i = 0; i < jugador.cartas.length; i++) {
         if (jugador.cartas[i].getId() === carta.getId()) {
-            console.log("voy a mueve");
             this.ui.mueveJugadorBaza(nombre, carta, i);
             break;
         }
@@ -213,7 +227,6 @@ haCantado(data) {
     imagen.style.position = "absolute";
     var indice = this.ui.indice(data.jugador);
     var punto = this.ui.jugadores[indice].posicionarCante(data.secuencia);
-    console.log("x " + punto.x + " y: " + punto.y);
     imagen.style.left = punto.x + "px";
     imagen.style.top =  punto.y + "px";
     document.getElementById("divimage").appendChild(imagen);
@@ -264,6 +277,7 @@ dialogoFinPartida() {
     } else {
         if (this.partidaTerminada.finCoto) {
             document.getElementById("linea1").innerHTML  = this.partidaTerminada.ganadores + " han ganado la partida y el coto. Marcador final:";
+            conectado= false;
         } else {
             document.getElementById("linea1").innerHTML  = this.partidaTerminada.ganadores + " han ganado la partida. El marcador está así:" ;
         }
@@ -280,5 +294,72 @@ esFinCoto() {
         return true;
     }
     return false;
+}
+
+procesaSnapshot(data) {
+    console.log('procesando snapshot');
+    var xnombres = data.nombres;
+    var xcartas = data.cartas;
+    var xbaza = data.baza;
+    var xmazo = data.mazo;
+    var xturno = data.turno;
+    var xganadas = data.ganadas;
+    var xcantes = data.cantes; // los cantes hechos no los recupero porque se desconocen los cantes ocultos!!!. Asumo que estan bien.
+    var xpuntos = data.puntos;
+
+    var i, j;
+    // el mazo
+    this.ui.mazo.triunfo = new Carta(xmazo.triunfo);
+    this.ui.mazo.numCartas = xmazo.numCartas;
+    // las cartas de los jugadores y sus cantes
+    for (i = 0; i < xnombres.length; i++) {
+        var indice = this.ui.indice(xnombres[i]);
+        this.ui.jugadores[indice].turno = false;
+        this.ui.jugadores[indice].cartas = [];  
+        xcartas[i].forEach( id => {
+            this.ui.jugadores[indice].cartas.push(new Carta(id));
+        })
+        this.ui.jugadores[indice].paloCantes = [];
+        for (j = 0 ; j < 4 ; j++) {
+            var paloCante = xcantes[i][j];    
+            if (paloCante != 0) {
+                if (this.ui.mazo.triunfo.palo === j) { // Cante 40
+                    this.ui.jugadores[indice].paloCantes.push(j);
+                    this.ui.jugadores[indice].paloCantes.push(j);
+                } else {
+                    if (paloCante === 1) {
+                        this.ui.jugadores[indice].paloCantes.push(j); // Cante 20 visto
+                    } else {
+                        this.ui.jugadores[indice].paloCantes.push(-1); // Cante 20 oculto
+                    }
+                }
+            }
+        }
+    }
+    // la baza
+    this.ui.baza.cartas = [];
+    xbaza.cartas.forEach(id => {
+        this.ui.baza.cartas.push(new Carta(id));
+    });
+    this.ui.baza.nombres = xbaza.nombres;
+    // las cartas ganadas
+    this.ui.ganadas.init();
+    this.ui.ganadas.addCartas(xganadas[0].nombre, xganadas[0].numCartas);
+    this.ui.ganadas.addCartas(xganadas[1].nombre, xganadas[1].numCartas);
+    // el turno
+    if (xturno === nombreJugador) {
+        this.turno = true;
+    }
+    var index = this.ui.indice(xturno);
+    this.ui.jugadores[index].ponerTurno();
+    if (xpuntos.vueltas === true) { // vamos de vueltas
+        document.getElementById("puntos").style.display = "block";
+        this.ponerPuntos(xpuntos);
+    } else {
+        document.getElementById("puntos").style.display = "none";
+    }
+    console.log("Snapshot cargado");
+
+    this.ui.dibujar();
 }
 }
