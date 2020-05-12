@@ -14,8 +14,10 @@ class GoPublico extends GoComun {
 
 /* Este metodo es distinto para publico y para jugador */
 ponerParejas(data) {
-    this.parejas[0] = data[0][0] + data[0][1];
-    this.parejas[1] = data[1][0] + data[1][1];
+    this.parejas[0] = data[0];
+    this.parejas[1] = data[1];
+//    this.parejas[0] = data[0][0] + data[0][1];
+//    this.parejas[1] = data[1][0] + data[1][1];
     this.ui.ganadas.parejas.push(this.parejas[0]);
     this.ui.ganadas.parejas.push(this.parejas[1]);
 
@@ -83,7 +85,13 @@ mensajeSalir() {
 }
 
 cancelarPartida() {
+    this.ui.canvas.fullScreen();
+    vaciaSelect(document.getElementById("usuarios"));
+    vaciaSelect(document.getElementById("pareja1"));
+    vaciaSelect(document.getElementById("pareja2"));
+    conectado = false;
     document.getElementById("modalsino").style.display = "none";
+    this.room.leave();
     abrirDialogoInicio();
     return true; // Esto cancela el manejador, para que ya no sigan llegando eventos.
 }

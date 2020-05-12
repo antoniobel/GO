@@ -98,6 +98,9 @@ class GoGame {
         if (mensaje.action === "Snapshot") {
             this.snapshot(mensaje.data);
         }
+        if (mensaje.action === "RevisionBaza") {
+            this.revisionBaza(mensaje.data);
+        }
     }
     
     /**
@@ -218,8 +221,11 @@ class GoGame {
 
     esJugador(nombre) {
         var i;
+        if (this.jugadores == null) { // No hay partida
+            return false;
+        }
         for (i = 0; i < this.jugadores.length; i++) {
-            if (this.jugadores[i] === nombre) {
+            if (this.jugadores[i].nombre === nombre) {
                 return true;
             }
         }
@@ -277,7 +283,7 @@ class GoGame {
         } else {
             console.log(`${nombre} ha jugado fuera de turno`);
             this.errorCounter++;
-            if (errorCounter > 5) { // Muchos errores de turno. Enviamos snapshot para que se sincronice.
+            if (this.errorCounter > 5) { // Muchos errores de turno. Enviamos snapshot para que se sincronice.
                 this.errorCounter = 0;
                 this.snapshot(nombre);
             }
@@ -312,19 +318,26 @@ class GoGame {
                 this.ganadorPartida();
             }
         } else { // la partida no ha terminado. Continuamos repartiendo carta, eventos de ronda y turno y juega.
+            var time1 = 100;
             if (this.ronda === 5) {
                 // Si estoy en ronda 5 (al principio) y algun jugador puede cambiar el 7 se hace automaticamente.
                 if (this.jugadores[this.indiceGanador].cambio7Posible(this.triunfo)) {
                    this.cambio7(this.jugadores[this.indiceGanador].nombre);
+                   time1 = 2500;
                 }
                 if (this.jugadores[this.miPareja(this.indiceGanador)].cambio7Posible(this.triunfo)) {
                     this.cambio7(this.jugadores[this.miPareja(this.indiceGanador)].nombre);
+                    time1 = 2500;
                 }
             }
-            if (this.ronda <= 5) this.repartir1Carta(); // se reparta carta solo en las 4 primeras rondas 
-            var time = 3500;
+            if (this.ronda <= 5) {
+                this.handler.clock.setTimeout(() => {
+                    this.repartir1Carta(); // se reparta carta solo en las 4 primeras rondas
+                } , time1); 
+            }
+            var time = time1 + 3500;
             if (this.ronda >5 ) {
-                time = 500; // en el arrastre no hay que esperar tanto porque no se reparten cartas.
+                time = time1 + 500; // en el arrastre no hay que esperar tanto porque no se reparten cartas.
             }
             this.handler.clock.setTimeout(() => {
                 // Acciones al comienzo de una nueva ronda
@@ -426,7 +439,7 @@ class GoGame {
             this.triunfo = this.jugadores[index].cambia7(this.triunfo);
             var carta = this.baraja.cartas.pop(); // Quitamos la última carta, que marca el triunfo
             this.baraja.cartas.push(this.triunfo); // añadimos la carta cambiada (el 7) en la última posición.
-            this.enviarEvento('' , { action: "HaCambiado7", data: {jugador: nombre , carta: carta}});
+            this.enviarEvento('' , { action: "HaCambiado7", data: {jugador: nombre , carta: carta.id}});
             this.guardaLog7('7' , index);
         }
         // Comprobar si con el cambio del 7 puede cantar
@@ -437,7 +450,8 @@ class GoGame {
 
     enviarEvento(nombre  , mensaje) {
         if (this.handler != null) {
-            console.log("Enviar evento: ->" , nombre , "<-" , mensaje.action);
+            var d = new Date();
+            console.log(d.getTime() , "Enviar evento: ->" , nombre , "<-" , mensaje.action);
             if ('data' in mensaje) {
                 console.log(mensaje.data);
             }
@@ -865,6 +879,17 @@ class GoGame {
         var data = { nombres: xnombres , cartas : xcartas , baza: xbaza , mazo: xmazo , turno: xturno , 
                      ganadas: xganadas , cantes: xcantes, puntos: xpuntos};
         this.enviarEvento(nombre , { action: 'Snapshot' , data: data });
+    }
+
+    revisionBaza(nombre) {
+        var indicePareja = this.indicePareja(this.getJugadorIndex(nombre));
+        if (this.cartasRecogidas[indicePareja].length === 0) return;
+        var ultimaBaza = [];
+        var i;
+        for (i = this.cartasRecogidas[indicePareja].length - 4; i < this.cartasRecogidas[indicePareja].length; i++) {
+            ultimaBaza.push(this.cartasRecogidas[indicePareja][i].id);
+        }
+        this.enviarEvento('' , { action: 'RevisionBaza' , data: {nombre: nombre , ultimaBaza: ultimaBaza }});
     }
 }
 exports.GoGame = GoGame;

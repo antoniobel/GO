@@ -14,9 +14,21 @@ var usuariosConectados = []; // Todos los usuarios conectados. Debe coincidir co
 
 /* Programa principal */
 var ui = new UI();
+var movimiento = false;
+var navegador = navegador();
+console.log(navegador , navegadorOs());
+if (navegadorOs() === 'Windows' || navegadorOs() ==='Linux') movimiento = true;
+setInterval(ui.parpadeo , 600);    // Arranco el timer. Un solo timer para todas las partidas
 var conectado = false;
 shortcut.add("Ctrl+X",function() {
 	requestSnapshot();
+});
+shortcut.add("Ctrl+A",function() {
+    if (movimiento) {
+        movimiento = false;
+    } else {
+        movimiento = true;
+    }
 });
 posicionarBotones();
 abrirDialogoInicio();
@@ -168,7 +180,12 @@ function conectar() {
         room = room_instance; // para poder manejarla fuera del then     
         conectado = true;              
         room.onMessage(function(message) {
-            console.log(message);
+            var d = new Date();
+            console.log(d.getTime() , message);
+            if ('ping' in message) {
+                room.send({ping: 0});
+                return;
+            }
             room.send({echo: message}); // Funcion eco. Mantener para verificar el log en el servidor. 
             if ('code' in message) {
                 if (message.code === 1) { // nombre repetido. hay que desconectarse.
@@ -344,4 +361,19 @@ function partidaComenzada() {
 
 function requestSnapshot() {
     room.send({ action: "Snapshot" , data: nombreJugador});
+}
+
+function navegador() {
+    if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) return 'Opera';
+    if(navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
+    if(navigator.userAgent.indexOf("Edge") != -1) return 'Edge';
+    if(navigator.userAgent.indexOf("Chrome") != -1 ) return 'Chrome';
+    if(navigator.userAgent.indexOf("Firefox") != -1 ) return 'Firefox';
+    return 'Desconocido';
+}
+
+function navegadorOs() {
+    if (navigator.userAgent.toLowerCase().indexOf("android") != -1) return "Android";
+    if (navigator.oscpu.indexOf("Windows") != -1) return "Windows";
+    if (navigator.oscpu.indexOf("Linux") != -1) return "Linux";
 }

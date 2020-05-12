@@ -94,20 +94,20 @@ class Baraja {
     
 /*    barajar() {
         var siete = this.cartas[6];
-        var sota1 = this.cartas[7];
+//        var sota1 = this.cartas[7];
         var rey1 = this.cartas[9];
 //        var sota2 = this.cartas[17];
 //        var rey2 = this.cartas[19];
 //        this.cartas.splice(19,1);
 //        this.cartas.splice(17,1);
         this.cartas.splice(9,1);
-        this.cartas.splice(7,1);
+//        this.cartas.splice(7,1);
         this.cartas.splice(6,1);
 //        this.cartas.splice(6,1);
 //        this.cartas.unshift(siete);
-        this.cartas.unshift(sota1);
-        this.cartas.unshift(rey1);
-        this.cartas.push(siete);
+//        this.cartas.unshift(sota1);
+        this.cartas.push(rey1);
+        this.cartas.unshift(siete);
 //        this.cartas.unshift(rey2);
 //        this.cartas.splice(12 , 0 , sota2);
     } */

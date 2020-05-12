@@ -72,7 +72,8 @@ procesaAction(action, data) {
     }
     if (action === "Turno") {
         var index = this.ui.indice(data);
-        this.ui.jugadores[index].ponerTurno();
+        this.ui.ponerTurno(this.ui.jugadores[index]);
+//        this.ui.jugadores[index].ponerTurno();
     }
     if (action === "Juega") {
         this.turno = true;
@@ -98,9 +99,7 @@ procesaAction(action, data) {
         this.partidaTerminada.marcador = [];
         this.partidaTerminada.finCoto = false;
         // Para que no quede ninguna luz de turno encendida.
-        this.ui.jugadores.forEach(jugador => {
-            jugador.quitarTurno();
-        });
+        this.ui.quitarTurno();
     }
     if (action === "HayVuelta") {
         this.partidaTerminada.hayVuelta = true;
@@ -124,7 +123,7 @@ procesaAction(action, data) {
         document.getElementById("cambio7").disabled = false;
     }
     if (action === "HaCambiado7") {
-        this.haCambiado7(data.jugador , data.carta);
+        this.haCambiado7(data.jugador , new Carta(data.carta));
     }
     if (action === "PartidaCancelada") {
         this.ui.init();
@@ -149,13 +148,28 @@ procesaAction(action, data) {
     }
     if (action === "NuevaConexion") {
         if (data !== this.nombreJugador) {
-            document.getElementById("msg").innerHTML =  data + " se ha conectado a la partida como espectador";
+            var indice = this.ui.indice(data);
+            if (indice == null) {
+                document.getElementById("msg").innerHTML =  data + " se ha conectado a la partida como espectador";
+            } else {
+                document.getElementById("msg").innerHTML =  "El jugador " + data + " se ha reconectado a la partida";
+            }
             document.getElementById("modalmsg").style.display = "block"; // abrimos el diálogo
             setTimeout(function() {
                 document.getElementById("modalmsg").style.display = "none"; 
             } , 3000);   
         }
     }
+    if (action === "JugadorDesconectado") {
+        document.getElementById("msg").innerHTML =  "El jugador " + data + " se ha desconectado de la la partida.";
+        document.getElementById("modalmsg").style.display = "block"; // abrimos el diálogo
+        setTimeout(function() {
+            document.getElementById("modalmsg").style.display = "none"; 
+        } , 3000);   
+    }
+    if (action === "RevisionBaza") {
+        this.revisionBaza(data);
+    }    
 }
 
 nuevaPartida(data) {
@@ -196,7 +210,7 @@ cartaJugada(nombre , carta) {
         }
     }
     // poner luz en rojo
-    jugador.quitarTurno();
+    this.ui.quitarTurno();
     if (this.nombreJugador === nombre) {
         this.turno = false;
     }
@@ -205,7 +219,7 @@ cartaJugada(nombre , carta) {
         document.getElementById("cambio7").disabled = true;
         document.getElementById("cante").disabled = true;
     }
-}
+}  
 
 bazaGanada(nombre) {
     this.ui.baza.ganador = nombre;
@@ -304,7 +318,7 @@ procesaSnapshot(data) {
     var xmazo = data.mazo;
     var xturno = data.turno;
     var xganadas = data.ganadas;
-    var xcantes = data.cantes; // los cantes hechos no los recupero porque se desconocen los cantes ocultos!!!. Asumo que estan bien.
+    var xcantes = data.cantes; 
     var xpuntos = data.puntos;
 
     var i, j;
@@ -351,7 +365,8 @@ procesaSnapshot(data) {
         this.turno = true;
     }
     var index = this.ui.indice(xturno);
-    this.ui.jugadores[index].ponerTurno();
+    this.ui.ponerTurno(this.ui.jugadores[index]);
+//    this.ui.jugadores[index].ponerTurno();
     if (xpuntos.vueltas === true) { // vamos de vueltas
         document.getElementById("puntos").style.display = "block";
         this.ponerPuntos(xpuntos);
@@ -361,5 +376,43 @@ procesaSnapshot(data) {
     console.log("Snapshot cargado");
 
     this.ui.dibujar();
+}
+
+revisionBaza(data) {
+    var ultimaBaza = data.ultimaBaza;
+    var nombre = data.nombre;
+    var i, imagen = [];
+    var indicePareja = this.indicePareja(nombre);
+    var punto = this.ui.ganadas.obtenerPunto(indicePareja);
+    punto.x = Math.floor(punto.x * this.ui.canvas.escala()) - 100; 
+    punto.y = Math.floor(punto.y * this.ui.canvas.escala()); 
+    for (i = 0; i < 4; i++) {
+        imagen[i] = this.ui.baraja.imagenes[ultimaBaza[i]];
+        imagen[i].style.position = "absolute";
+        imagen[i].style.left = punto.x + "px";
+        imagen[i].style.top =  punto.y + "px";
+        imagen[i].style.width =  Math.floor(this.ui.baraja.ancho() * this.ui.canvas.escala()) + "px";
+        imagen[i].style.height =  Math.floor(this.ui.baraja.alto() * this.ui.canvas.escala()) + "px";
+        document.getElementById("divimage").appendChild(imagen[i]);
+        punto.x += 50;
+    }
+    document.getElementById("modalcante").style.display = "block";
+    setTimeout(function() {
+        document.getElementById("modalcante").style.display = "none";
+        var i;
+        for (i = 0; i < 4; i++) {
+            document.getElementById("divimage").removeChild(imagen[i]);
+        }
+    } , 3000);
+}
+
+indicePareja(nombre) {
+    if (this.parejas[0][0] === nombre || this.parejas[0][1] === nombre) {
+        return 0;
+    }
+    if (this.parejas[1][0] === nombre || this.parejas[1][1] === nombre) {
+        return 1;
+    }
+    return -1;
 }
 }

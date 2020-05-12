@@ -55,6 +55,11 @@ class Handler extends colyseus.Room {
 
     onCreate () {
         this.setState(new State());
+        this.pingContinue = true;
+        this.pingFlag = true;
+        this.colaFallos = [];
+        this.clock.setTimeout(this.pingSend, 5000 , this);
+        console.log("Ping iniciado");
     }
     
     onAuth(client, options, req) {
@@ -70,7 +75,6 @@ class Handler extends colyseus.Room {
             this.sendOne(options.nombre , { message: "Bienvenido " + options.nombre});
             if (this.game.gameStarted) { // Si la partida ha comenzado, incorporar al juego.
                 this.game.incorporar(options.nombre);
-//                this.send(client , { message: "La partida ya ha comenzado. Tendrás que esperar." + options.nombre , code: 2 });
             }
             this.broadcast({conexiones: this.state.players});        
         } else { // si lo hay, lo echamos.
@@ -82,26 +86,40 @@ class Handler extends colyseus.Room {
 
     onLeave (client) {
         console.log("Cliente " + client.sessionId + " desconectado");
+        var nombre = this.getName(client.sessionId);
+        var esJugador = this.game.esJugador(nombre); // miro si es jugador antes de quitarlo de la lista
         this.state.removePlayer(client.sessionId);
-        this.broadcast({conexiones: this.state.players});        
+        this.broadcast({conexiones: this.state.players}); 
+        if (this.game.gameStarted) {
+            if (esJugador) {
+                this.broadcast({action: "JugadorDesconectado" , data: nombre});        
+            }
+        }       
     }
 
     onMessage (client, data) {
+        if ('ping' in data) {
+            this.pingReceived(client);
+            return;
+        }
+        var d = new Date();
         if ('echo' in data) {
             if ('action' in data.echo) {
-                console.log("Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.action);
+                console.log(d.getTime() , "Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.action);
                 console.log(data.echo.data);
             } else {
                 console.log("Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.data);
             }
         } else {
-            console.log("Mensaje recibido", this.getName(client.sessionId) , client.sessionId, ":", data);
+            console.log(d.getTime() , "Mensaje recibido", this.getName(client.sessionId) , client.sessionId, ":", data);
             this.game.messageReceiver(this.getName(client.sessionId) , data);
         }
     }
 
     onDispose () {
         console.log("Dispose StateHandlerRoom");
+        this.pingContinue = false;
+        console.log("Ping finalizado");
     }
 
     sendAll(message) {
@@ -109,7 +127,12 @@ class Handler extends colyseus.Room {
     }
     
     sendOne(nombre, message) {
-        this.send(this.getClient(nombre) , message);
+        var clientId = this.getClient(nombre);
+        if (clientId != null) {
+            this.send(this.getClient(nombre) , message);
+        } else {
+            console.log("Cliente " + nombre + " desconectado. No se envia evento " , message);
+        }
     }
     
     sendAllButOne(nombre, message) {
@@ -140,6 +163,78 @@ class Handler extends colyseus.Room {
             }
         });        
         return c;
+    }
+
+    getClientConId(id) {
+        var c;
+        this.clients.forEach( client => {
+            if (client.sessionId === id) {
+                c = client;
+            }
+         });
+         return c;
+    }
+
+    pingSend(handler) {
+        if (handler.pingFlag) {
+            console.log("Ping");
+            handler.pings = [];
+            handler.clients.forEach(cliente => {
+                handler.pings.push(cliente.id);
+            });
+            handler.broadcast({ ping : 1});
+            handler.pingFlag = false;
+        } else {
+            handler.pingFlag = true;
+            if (handler.pings.length === 0) {
+                console.log("Todos los clientes contestan");
+            } else {
+                console.log("Algunos clientes no han contestado");
+                handler.pings.forEach(cliente => {
+                    handler.colaFallos.push(cliente);
+                    console.log(cliente);
+                });
+                if (handler.colaFallos.length > 5) {
+                    handler.analisisCola(handler);
+                }
+            }
+        }
+        if (handler.pingContinue) {
+            handler.clock.setTimeout(handler.pingSend, 5000 , handler);
+        }
+    }
+
+    pingReceived(cliente) {
+        var i;
+        for (i= 0; i < this.pings.length; i++) {
+            if (this.pings[i] === cliente.id) {
+                this.pings.splice(i,1);
+                break;
+            }
+        }
+    }
+
+    analisisCola(handler) {
+        console.log('Analisis cola');
+        handler.colaFallos.sort();
+        var id = handler.colaFallos[0];
+        var i , counter = 1;
+        for (i = 1 ; i < handler.colaFallos.length; i++) {
+            if (handler.colaFallos[i] === id) counter++;
+        }
+        if (counter > 3) {
+            var client = handler.getClientConId(id);
+            console.log('Se fuerza desconexion de' , id);
+            if (client != null) {
+                client.leave();
+            }
+            while(handler.colaFallos[0] === id) {
+                handler.colaFallos.shift();
+            }
+            if (handler.colaFallos.length > 3) {
+                handler.analisisCola(handler);
+            }
+        }
     }
 };
 exports.Handler = Handler;

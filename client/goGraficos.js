@@ -168,7 +168,7 @@ class GJugador {
     init() {
         this.cartas = [];
         this.paloCantes = [];
-        this.quitarTurno();
+//        this.quitarTurno();
         this.turno = false;
     }
 
@@ -311,37 +311,6 @@ class GJugador {
             context.drawImage(this.ui.roja, this.luzx , this.luzy);
         }
 
-    }
-
-    ponerTurno() {
-        if (this.intervalId > 0) {
-            clearInterval(this.intervalId); // No debería pasar pero si llega aquí, es que hay otra luz. Quitarla!!
-        }
-        if (!this.turno) {
-            this.turno = true;
-            this.luzVerde = false;
-            this.intervalId = setInterval(this.parpadeo , 600 , this); 
-        }
-    }
-
-    parpadeo(jugador) {
-        var context = jugador.ui.canvas.context();
-        if (!jugador.luzVerde) {
-            jugador.luzVerde = true;
-            context.drawImage(jugador.ui.verde , jugador.luzx , jugador.luzy);
-        } else {
-            jugador.luzVerde = false;
-            context.drawImage(jugador.ui.gris , jugador.luzx , jugador.luzy);
-        }
-    }
-
-    quitarTurno() {
-        if (this.turno) {
-            var context = this.ui.canvas.context();
-            this.turno = false;
-            context.drawImage(this.ui.roja, this.luzx , this.luzy);
-            clearInterval(this.intervalId);
-        }
     }
 
     cambia7(carta){
@@ -559,18 +528,34 @@ class GGanadas {
         this.ganadas.push(0);
         this.ganadas.push(0);
         this.giros = [];
+        this.zonas = [];
+        var punto = this.obtenerPunto(0);
+        this.zonas[0] = new Zona(punto.x, punto.y , punto.x + this.ui.baraja.alto() , punto.y + this.ui.baraja.alto());
+        punto = this.obtenerPunto(1);
+        this.zonas[1] = new Zona(punto.x, punto.y , punto.x + this.ui.baraja.alto() , punto.y + this.ui.baraja.alto());
     }
 
     dibujar() {
         var context = this.ui.canvas.context();
         var i = 0;
+        var punto = this.obtenerPunto(0);
+        this.dibujarCartas(0, punto.x , punto.y);
+        punto = this.obtenerPunto(1);
+        this.dibujarCartas(1, punto.x , punto.y);
+    }
+
+    obtenerPunto(indice) {
         var x , y;
-        x = this.ui.baraja.alto() * 1.5;
-        y = this.ui.canvas.alto() - this.ui.baraja.alto() * 1.5;
-        this.dibujarCartas(0, x , y);
-        x = this.ui.canvas.ancho() - this.ui.baraja.alto() * 2.2;
-        y = this.ui.baraja.alto() * 0.5;
-        this.dibujarCartas(1, x , y);
+        if (indice === 0) {
+            x = this.ui.baraja.alto() * 1.5;
+            y = this.ui.canvas.alto() - this.ui.baraja.alto() * 1.5;
+            return {x: x , y: y};
+        }
+        if (indice === 1) {
+            x = this.ui.canvas.ancho() - this.ui.baraja.alto() * 2.2;
+            y = this.ui.baraja.alto() * 0.5;
+            return {x: x , y: y};
+        }
     }
 
     dibujarCartas(index, x , y) {
@@ -599,23 +584,39 @@ class GGanadas {
     addCartas(nombre , numCartas) {
         var i;
         for (i = 0; i < 2; i++) {
-            if (this.parejas[i].indexOf(nombre) >= 0) {
+            if (this.parejas[i][0] === nombre || this.parejas[i][1] === nombre) {
                 this.ganadas[i] += numCartas;
             }
         }
     }
 
     puntoMueve(nombre) {
-        var x , y;
-        if (this.parejas[0].indexOf(nombre) >= 0) {
-            x = this.ui.baraja.alto() * 1.5;
-            y = this.ui.canvas.alto() - this.ui.baraja.alto() * 1.5;
+        var punto;
+        if (this.parejas[0][0] === nombre || this.parejas[0][1] === nombre) {
+            punto = this.obtenerPunto(0);
         }
-        if (this.parejas[1].indexOf(nombre) >= 0) {
-            x = this.ui.canvas.ancho() - this.ui.baraja.alto() * 2.2;
-            y = this.ui.baraja.alto() * 0.5;
+        if (this.parejas[1][0] === nombre || this.parejas[1][1] === nombre) {
+            punto = this.obtenerPunto(1);
         }
-        return { x : x , y : y };
+        return { x : punto.x , y : punto.y };
+    }
+
+    /**
+     * Detecta si se ha hecho click en alguno de los bloques de cartas ganadas. Si no se ha hecho click devuelve -1.
+     * Si se ha hecho click en las cartas propias se devuelve 0 y en las ajenas 1.
+     * @param {*} x 
+     * @param {*} y 
+     */
+    click(x , y) {
+        var i ;
+        for (i = 0; i < 2; i++) {
+            if (this.ganadas[i] > 0) {
+                if (this.zonas[i].estaDentro(x / this.ui.canvas.escala() , y / this.ui.canvas.escala())) {
+                    return i;
+                } 
+            }
+        }
+        return -1;
     }
 }
 
@@ -633,7 +634,7 @@ class UI {
         this.roja.src = '../client/img/Luz-roja.png';             
         this.gris = new Image();
         this.gris.src = '../client/img/Luz-off.png';   
-        this.animaciones = [];          
+        this.animaciones = [];    
     }
 
     /**
@@ -720,6 +721,36 @@ class UI {
         return null;
     }
 
+    ponerTurno(jugador) {
+        this.quitarTurno();
+        jugador.turno = true;
+        jugador.luzVerde = false;
+    }
+
+    quitarTurno() {
+        this.jugadores.forEach(jugador => {
+            jugador.turno = false;
+        });
+    }
+
+    parpadeo() {
+        var context = ui.canvas.context();
+        var i , jugador , mantener = false;
+        for (i = 0; i < ui.jugadores.length; i++) {
+            jugador = ui.jugadores[i];
+            if (jugador.turno) {
+                if (!jugador.luzVerde) {
+                    jugador.luzVerde = true;
+                    context.drawImage(jugador.ui.verde , jugador.luzx , jugador.luzy);
+                } else {
+                    jugador.luzVerde = false;
+                    context.drawImage(jugador.ui.gris , jugador.luzx , jugador.luzy);        
+                }
+                break;
+            }
+        }
+    }
+
     /**
      * Movimiento de carta desde el mazo a las cartas de un jugador (Acción Dar1Carta)
      * @param {*} nombre - Nombre del jugador que recibe la carta
@@ -787,8 +818,9 @@ class UI {
      */
     mueveBazaGanadas(nombre) {
         var i;
-        for (i = 0; i < 4; i++) {
-            var desde = this.baza.puntoMueve(this.jugadores[i].nombre);
+//        for (i = 0; i < 4; i++) {
+        while (this.baza.nombres.length > 0) {
+            var desde = this.baza.puntoMueve(this.baza.nombres[0]);
             var hasta = this.ganadas.puntoMueve(nombre);
             var animacion = new Animacion(ui , this.baraja.imagenes[this.baza.cartas[0].id] , desde , hasta);
             animacion.xnombre = nombre;
@@ -902,7 +934,7 @@ class Animacion {
         }
         var context = this.ui.canvas.context();
         var time = new Date();
-        if (this.milis === 0) {
+        if (this.milis === 0) { // la primera vez
             this.milis = time.getTime();
             context.drawImage(this.imagen, this.inicio.x , this.inicio.y);
             this.actual = this.inicio;
@@ -915,10 +947,13 @@ class Animacion {
         var d = this.velocidad * delta; // Distancia recorrida en el intervalo
         this.actual.x = this.actual.x + ((this.fin.x - this.actual.x) * d) / this.a; // posicion actual
         this.actual.y = this.actual.y + ((this.fin.y - this.actual.y)) * d / this.a;
-        context.drawImage(this.imagen, this.actual.x , this.actual.y);
         if (this.a < d) { // Si la distancia que avanzamos es mayor que lo que nos queda ya hemos llegado
             this.terminado = true;
+            this.actual.x = this.fin.x; 
+            this.actual.y = this.fin.y;
+    
         }
+        context.drawImage(this.imagen, this.actual.x , this.actual.y);
         this.a = Math.sqrt((this.fin.x - this.actual.x)*(this.fin.x - this.actual.x) + (this.fin.y - this.actual.y)*(this.fin.y - this.actual.y));
     }
 }
@@ -954,22 +989,37 @@ function drawTextBG(ctx, txt, font, x, y) {
 }
 var ui;
 
+var tick = new Date(); 
 /**
  * Dibuja todo el canvas. Primero dibuja las animaciones, si las hay, y después
  * los objetos estáticos: Jugador, baza, mazo y cartas ganadas.
  */
 function redibujar() {
+    if (navegador === 'Chrome' || navegador === 'Opera') { // para estos navegadoress, demasiadas llamadas a redibujar estropean el rendimiento
+        // No pasa en Firefox y Edge. Safari no se ha probado.
+        var t = new Date();
+        if (t.getTime() - tick.getTime() < 5) {
+            console.log(t.getTime() - tick.getTime());
+            return;
+        }
+        tick = t; 
+   }
     ui.canvas.ponerFondo();
     var i;
     // Dibujamos las animaciones primero
     for (i = ui.animaciones.length - 1 ; i >= 0 ; i--) {
         var animacion = ui.animaciones[i];
-        if (!animacion.terminado) {
-            animacion.dibujar();
-        } else { // animacion terminada. La función de callback hace las acciones posteriores al movimiento.
+        if (movimiento) {
+            if (!animacion.terminado) {
+                animacion.dibujar();
+            } else { // animacion terminada. La función de callback hace las acciones posteriores al movimiento.
                 animacion.callback(animacion); // llamo a la funcion de callback de la animación que está en ui!!! calback...
                 ui.animaciones.splice(i,1); // quitamos la animacion de la lista
-        }; 
+            }; 
+        } else {// sin movimiento equivale a animación terminada. Se llama al callback y se elimina de la lista
+            animacion.callback(animacion); 
+            ui.animaciones.splice(i,1); 
+        }
     }
     // Dibujamos los objetos estaticos
     ui.jugadores.forEach(jugador => {
@@ -981,5 +1031,6 @@ function redibujar() {
     // Si hay animaciones en marcha invocamos de nuevo redibujar para que continue.
     if (ui.animaciones.length > 0) {
         window.requestAnimationFrame(redibujar);
+//        setTimeout(redibujar , 20);
     }
 }

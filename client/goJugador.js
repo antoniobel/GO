@@ -13,14 +13,21 @@ class GoJugador extends GoComun {
     }
 
 ponerParejas(data) {
-    this.parejas[0] = data[0][0] + data[0][1];
-    this.parejas[1] = data[1][0] + data[1][1];
-    // El jugador local debe ser siempre la pareja 0. Si esta en la 1, invertimos
-    if (this.parejas[1].indexOf(this.nombreJugador) >= 0) {
-        var p = this.parejas[0];
-        this.parejas[0] = this.parejas[1];
-        this.parejas[1] = p;
+    if (data[0][0] === this.nombreJugador || data[0][1] === this.nombreJugador) {
+        this.parejas[0] = data[0];
+        this.parejas[1] = data[1];
+    } else {
+        this.parejas[0] = data[1];
+        this.parejas[1] = data[0];
     }
+//    this.parejas[0] = data[0][0] + data[0][1];
+//    this.parejas[1] = data[1][0] + data[1][1];
+    // El jugador local debe ser siempre la pareja 0. Si esta en la 1, invertimos
+//    if (this.parejas[1].indexOf(this.nombreJugador) >= 0) {
+//        var p = this.parejas[0];
+//        this.parejas[0] = this.parejas[1];
+//        this.parejas[1] = p;
+//    }
     this.ui.ganadas.parejas.push(this.parejas[0]);
     this.ui.ganadas.parejas.push(this.parejas[1]);
     var x = [];
@@ -51,6 +58,9 @@ ponerParejas(data) {
 
 // Métodos que corresponden a eventos onclick de botones html
 canvasClicked(e) {
+    if (e.x < 50 && e.y < 50) {
+        requestSnapshot();
+    }
     if (this.turno) {
         var miclick = this.ui.click(e.x , e.y);
         if (miclick != null) {
@@ -58,7 +68,13 @@ canvasClicked(e) {
                 console.log("Se ha pulsado " + miclick.carta);
                 this.room.send({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
             }
-        }   
+        } else { // ver si ha pulsado en la zona de cartas para revisar
+            var index = this.ui.ganadas.click(e.x, e.y);
+            if (index >= 0) {
+                console.log("Se ha pulsado cartas ganadas " + index);
+                this.room.send({ action: "RevisionBaza" , data: this.ui.jugadores[index].nombre});
+            }
+        }          
     }
 }
 
