@@ -63,6 +63,11 @@ class GoGame {
         }
         this.snapshot(nombre);
         this.enviarEvento('' , { action: "NuevaConexion", data: nombre});
+        if (this.esJugador(nombre)) {
+            if (this.flagCartaJugada) {
+                this.cartaJugadaOk(nombre);
+            }
+        }
     }
 
     /**
@@ -100,6 +105,9 @@ class GoGame {
         }
         if (mensaje.action === "RevisionBaza") {
             this.revisionBaza(mensaje.data);
+        }
+        if (mensaje.action === "CartaJugadaOk") {
+            this.cartaJugadaOk(mensaje.data);
         }
     }
     
@@ -187,10 +195,12 @@ class GoGame {
             // Establecer turno de juego
             this.turno = 0; // indice del array de orden
             var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
+            this.sincroCartas = [];
             this.enviarEvento('' , { action: "Turno", data: nombreJugador });
             // Enviar orden de jugar al jugador con el turno
             this.errorCounter = 0; // controlador para errores de turno de juego
-            this.enviarEvento(nombreJugador , { action: "Juega" });           
+            this.snapshot(nombreJugador);        
+            this.enviarEvento(nombreJugador , { action: "Juega" });   
         } , time); 
     }
 
@@ -250,33 +260,9 @@ class GoGame {
                     }
                 }
                 this.baza.push(carta);
+                this.flagCartaJugada = true;
                 this.enviarEvento('' , { action: "CartaJugada" , data: {jugador: nombre , carta: carta.getId()}});
                 this.guardaLog('J');
-                this.turno++;
-                if (this.turno === 2) {
-                    this.enviarEvento('' , { action: "NoCanteCambio" });
-                }
-                if (this.turno > 3) {
-                    // ronda terminada. Esperamos 3 segundos antes lanzar el proceso de ronda terminada
-                    this.handler.clock.setTimeout(() => {
-                        this.indiceGanador = this.calculaGanadorBaza();
-                        this.acumulaPuntos(this.indiceGanador);
-                        this.enviarEvento('' , { action: "BazaGanada" , data: this.jugadores[this.indiceGanador].nombre});
-                        this.enviarEvento('' , { action: "Puntos" , data: {parejas: this.nombresPareja , puntos: this.puntos}});
-                    } , 1500);
-                    this.handler.clock.setTimeout(() => {
-                        this.recogeCartas(this.indiceGanador);
-                    } , 2000); 
-                    this.handler.clock.setTimeout(() => {
-                        this.rondaTerminada();
-                    } , 3500); 
-                } else {
-                    this.handler.clock.setTimeout(() => {
-                        var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
-                        this.enviarEvento('' , { action: "Turno", data: nombreJugador });
-                        this.enviarEvento(nombreJugador , { action: "Juega" });
-                    } , 800);
-                }
             } else {
                 // El jugador ha tirado una carta no válida (en el arrastre)
             }
@@ -290,7 +276,50 @@ class GoGame {
         }
     }
 
-    rondaTerminada() {
+    siguienteTurno() {
+        this.handler.clock.setTimeout(() => {
+            var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
+             this.enviarEvento('' , { action: "Turno", data: nombreJugador });
+            this.snapshot(nombreJugador);        
+            this.enviarEvento(nombreJugador , { action: "Juega" });
+        } , 600);
+    }
+
+    cartaJugadaOk(nombre) {
+        this.sincroCartas.push(nombre);
+        if (this.sincroCartas.length >= 4) {
+            console.log("Tengo 4 cartas ok");
+            this.turno++;
+            if (this.turno === 2) {
+                this.enviarEvento('' , { action: "NoCanteCambio" });
+            }
+            if (this.turno > 3) {
+                this.rondaTerminada1();
+            } else {
+                this.siguienteTurno();
+            }
+            this.sincroCartas = [];
+            this.flagCartaJugada = false;
+        }
+    }
+
+    rondaTerminada1() {
+        // ronda terminada. Esperamos 3 segundos antes lanzar el proceso de ronda terminada
+        this.handler.clock.setTimeout(() => {
+            this.indiceGanador = this.calculaGanadorBaza();
+            this.acumulaPuntos(this.indiceGanador);
+            this.enviarEvento('' , { action: "BazaGanada" , data: this.jugadores[this.indiceGanador].nombre});
+            this.enviarEvento('' , { action: "Puntos" , data: {parejas: this.nombresPareja , puntos: this.puntos}});
+        } , 1500);
+        this.handler.clock.setTimeout(() => {
+            this.recogeCartas(this.indiceGanador);
+        } , 2000); 
+        this.handler.clock.setTimeout(() => {
+            this.rondaTerminada2();
+        } , 3500); 
+    }
+
+    rondaTerminada2() {
         //hemos terminado ronda. evaluar baza , recoger cartas y pasar a la siguiente
 //        this.recogeCartas(this.indiceGanador);
         this.fijarOrden(this.indiceGanador);

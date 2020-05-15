@@ -121,4 +121,8 @@ cancelarPartida() {
     return false;
 }
 
+cartaJugadaRespuesta() {
+    this.room.send({ action: "CartaJugadaOk" , data: nombreJugador});
+}
+
 } // fin de clase

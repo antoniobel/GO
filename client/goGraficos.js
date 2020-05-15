@@ -386,6 +386,16 @@ class GJugador {
             }
         }
     }
+
+    ponerCarta(carta) {
+        var i;
+        for (i = 0; i < this.cartas.length; i++) {
+            if (this.cartas[i].id === carta.id) {
+                return;
+            }
+        }
+        this.cartas.push(carta);
+    }
 }
 
 class GBaza {
@@ -777,7 +787,8 @@ class UI {
      */
     callbackMazoJugador(animacion) {
         console.log("callbackMazoJugador" , animacion.xcarta ,animacion.xindice);
-        ui.jugadores[animacion.xindice].cartas.push(animacion.xcarta);
+//        ui.jugadores[animacion.xindice].cartas.push(animacion.xcarta);
+        ui.jugadores[animacion.xindice].ponerCarta(animacion.xcarta);
     }
 
     /**
@@ -894,7 +905,7 @@ class UI {
     callbackCambio7Vuelta(animacion) {
         console.log("callbackCambio7Vuelta" , animacion);
         var indice = ui.indice(animacion.xnombre);
-        ui.jugadores[indice].cartas.push(animacion.xcarta);
+        ui.jugadores[indice].ponerCarta(animacion.xcarta);
     }
 }
 

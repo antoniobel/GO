@@ -73,7 +73,6 @@ procesaAction(action, data) {
     if (action === "Turno") {
         var index = this.ui.indice(data);
         this.ui.ponerTurno(this.ui.jugadores[index]);
-//        this.ui.jugadores[index].ponerTurno();
     }
     if (action === "Juega") {
         this.turno = true;
@@ -214,12 +213,18 @@ cartaJugada(nombre , carta) {
     if (this.nombreJugador === nombre) {
         this.turno = false;
     }
+    this.cartaJugadaRespuesta();
     // Si ha jugado el jugador local deshabilitar botones de cante y cambio7
     if (nombre === this.nombreJugador) {
         document.getElementById("cambio7").disabled = true;
         document.getElementById("cante").disabled = true;
     }
+    this.ui.dibujar();
 }  
+
+cartaJugadaRespuesta() {
+
+}
 
 bazaGanada(nombre) {
     this.ui.baza.ganador = nombre;
@@ -271,6 +276,7 @@ haCambiado7(nombre , cartaTriunfo) {
         } 
     }
     if (c != null) {
+        document.getElementById("cambio7").disabled = true;
         this.ui.mueveCambio7(nombre, c, indiceCarta, cartaTriunfo);
     }
 }
@@ -329,10 +335,15 @@ procesaSnapshot(data) {
     for (i = 0; i < xnombres.length; i++) {
         var indice = this.ui.indice(xnombres[i]);
         this.ui.jugadores[indice].turno = false;
-        this.ui.jugadores[indice].cartas = [];  
+        var xcartasNuevas = [];
+        xcartas[i].forEach(id => {
+            xcartasNuevas.push(new Carta(id));
+        })
+        this.cartasJugador(indice , xcartasNuevas);        
+/*        this.ui.jugadores[indice].cartas = [];  
         xcartas[i].forEach( id => {
             this.ui.jugadores[indice].cartas.push(new Carta(id));
-        })
+        })*/
         this.ui.jugadores[indice].paloCantes = [];
         for (j = 0 ; j < 4 ; j++) {
             var paloCante = xcantes[i][j];    
@@ -378,6 +389,31 @@ procesaSnapshot(data) {
     this.ui.dibujar();
 }
 
+cartasJugador(indice , cartasNuevas) {
+    var i;
+    var cartasJugador = this.ui.jugadores[indice].cartas;
+    for (i = cartasJugador.length - 1 ; i >= 0; i--) {
+        if (this.cartaEsta(cartasJugador[i] , cartasNuevas) === -1) {// Si la carta no esta en las nuevas la quitamos
+            cartasJugador.splice(i,1);
+        }
+    }
+    for (i = 0 ; i < cartasNuevas.length ; i++) {
+        if (this.cartaEsta(cartasNuevas[i], cartasJugador) === -1) {// Si la carta no esta en las del jugador la añadimos al final
+            cartasJugador.push(cartasNuevas[i]);
+        }
+    }  
+    this.ui.jugadores[indice].cartas = cartasJugador;
+}
+
+cartaEsta(carta , cartas) {
+    var i;
+    for (i = 0; i < cartas.length; i++) {
+        if (cartas[i].id === carta.id) {
+            return i;
+        }
+    }
+    return -1;
+}
 revisionBaza(data) {
     var ultimaBaza = data.ultimaBaza;
     var nombre = data.nombre;

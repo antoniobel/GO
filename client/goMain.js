@@ -373,7 +373,8 @@ function navegador() {
 }
 
 function navegadorOs() {
+    console.log(navigator.userAgent);
     if (navigator.userAgent.toLowerCase().indexOf("android") != -1) return "Android";
-    if (navigator.oscpu.indexOf("Windows") != -1) return "Windows";
-    if (navigator.oscpu.indexOf("Linux") != -1) return "Linux";
+    if (navigator.userAgent.toLowerCase().indexOf("windows") != -1) return "Windows";
+    if (navigator.userAgent.toLowerCase().indexOf("linux") != -1) return "Linux";
 }

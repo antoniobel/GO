@@ -49,6 +49,7 @@ exports.State = State;
 class Handler extends colyseus.Room {
     constructor() {
         super();
+        this.setSeatReservationTime(30);
         this.maxClients = 10;
         this.game = new GoGame(this);
     }
@@ -226,7 +227,8 @@ class Handler extends colyseus.Room {
             var client = handler.getClientConId(id);
             console.log('Se fuerza desconexion de' , id);
             if (client != null) {
-                client.leave();
+//                client.leave(1000); ==> leave is not a function
+                client.close();
             }
             while(handler.colaFallos[0] === id) {
                 handler.colaFallos.shift();
