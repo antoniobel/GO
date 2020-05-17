@@ -28,8 +28,8 @@ ponerParejas(data) {
 //        this.parejas[0] = this.parejas[1];
 //        this.parejas[1] = p;
 //    }
-    this.ui.ganadas.parejas.push(this.parejas[0]);
-    this.ui.ganadas.parejas.push(this.parejas[1]);
+    this.ui.ganadas.parejas[0] = this.parejas[0];
+    this.ui.ganadas.parejas[1] = this.parejas[1];
     var x = [];
     x.push(data[0][0]);
     x.push(data[1][0]);
@@ -67,6 +67,7 @@ canvasClicked(e) {
             if (miclick.nombre === this.nombreJugador && miclick.carta != null) { 
                 console.log("Se ha pulsado " + miclick.carta);
                 this.room.send({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
+                this.ui.sounds[0].play();
             }
         } else { // ver si ha pulsado en la zona de cartas para revisar
             var index = this.ui.ganadas.click(e.x, e.y);

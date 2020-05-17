@@ -88,6 +88,7 @@ function abrirDialogoInicio() {
     vaciaPareja(document.getElementById("pareja1"));
     vaciaPareja(document.getElementById("pareja2"));
     document.getElementById("myModal").style.display = "block"; // abrimos el diálogo
+    document.getElementById("name").focus(); 
     document.getElementById("comenzar").disabled = true;
 }
 

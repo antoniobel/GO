@@ -195,6 +195,7 @@ class GoGame {
             // Establecer turno de juego
             this.turno = 0; // indice del array de orden
             var nombreJugador = this.jugadores[this.orden[this.turno]].nombre;
+            this.flagCartaJugada = false;
             this.sincroCartas = [];
             this.enviarEvento('' , { action: "Turno", data: nombreJugador });
             // Enviar orden de jugar al jugador con el turno
@@ -248,6 +249,10 @@ class GoGame {
      * @param {*} carta carta que ha tirado.
      */
     cartaJugada(nombre , carta) {
+        if (this.flagCartaJugada) {
+            console.log('Carta repetida. Me voy');
+            return; // Es una carta repetida. Ya hay una en proceso. Prevenir incidente ticket #35
+        }
         var index = this.getJugadorIndex(nombre);
         if (index === this.orden[this.turno]) { // compruebo que el jugador tiene el turno
             this.errorCounter = 0; 
@@ -265,6 +270,7 @@ class GoGame {
                 this.guardaLog('J');
             } else {
                 // El jugador ha tirado una carta no válida (en el arrastre)
+                this.enviarEvento(nombre , { action: "CartaInvalida" , data: {jugador: nombre , carta: carta.getId()}});
             }
         } else {
             console.log(`${nombre} ha jugado fuera de turno`);
@@ -900,7 +906,10 @@ class GoGame {
             i++;
         })
         var xbaza = {cartas: bazaCartas, nombres: bazaNombres};
-        var xturno = this.jugadores[this.orden[this.turno]].nombre;
+        var xturno;
+        if (this.turno <= 3) {
+            xturno = this.jugadores[this.orden[this.turno]].nombre;
+        }
         var xganadas = [];
         xganadas.push({nombre: this.jugadores[0].nombre, numCartas: this.cartasRecogidas[0].length});
         xganadas.push({nombre: this.jugadores[1].nombre, numCartas: this.cartasRecogidas[1].length});

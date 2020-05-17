@@ -18,8 +18,8 @@ ponerParejas(data) {
     this.parejas[1] = data[1];
 //    this.parejas[0] = data[0][0] + data[0][1];
 //    this.parejas[1] = data[1][0] + data[1][1];
-    this.ui.ganadas.parejas.push(this.parejas[0]);
-    this.ui.ganadas.parejas.push(this.parejas[1]);
+    this.ui.ganadas.parejas[0] = this.parejas[0];
+    this.ui.ganadas.parejas[1] = this.parejas[1];
 
     this.ui.crearJugador(data[0][0] , "abajo");
     this.ui.crearJugador(data[1][0] , "derecha");

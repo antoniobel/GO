@@ -645,6 +645,9 @@ class UI {
         this.gris = new Image();
         this.gris.src = '../client/img/Luz-off.png';   
         this.animaciones = [];    
+        this.sounds = [];
+        this.sounds[0] = new Audio('../client/img/playcard.mp3');
+        this.sounds[1] = new Audio('../client/img/error.mp3');
     }
 
     /**

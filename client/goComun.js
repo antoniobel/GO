@@ -73,6 +73,7 @@ procesaAction(action, data) {
     if (action === "Turno") {
         var index = this.ui.indice(data);
         this.ui.ponerTurno(this.ui.jugadores[index]);
+        this.ui.dibujar();
     }
     if (action === "Juega") {
         this.turno = true;
@@ -168,6 +169,9 @@ procesaAction(action, data) {
     }
     if (action === "RevisionBaza") {
         this.revisionBaza(data);
+    }    
+    if (action === "CartaInvalida") {
+        this.ui.sounds[1].play();
     }    
 }
 
@@ -372,11 +376,15 @@ procesaSnapshot(data) {
     this.ui.ganadas.addCartas(xganadas[0].nombre, xganadas[0].numCartas);
     this.ui.ganadas.addCartas(xganadas[1].nombre, xganadas[1].numCartas);
     // el turno
-    if (xturno === nombreJugador) {
-        this.turno = true;
+    if (xturno != null) {
+        if (xturno === nombreJugador) {
+            this.turno = true;
+        }
+        var index = this.ui.indice(xturno);
+        this.ui.ponerTurno(this.ui.jugadores[index]);
+    } else {
+        this.ui.quitarTurno(); // Nadie tiene el turno
     }
-    var index = this.ui.indice(xturno);
-    this.ui.ponerTurno(this.ui.jugadores[index]);
 //    this.ui.jugadores[index].ponerTurno();
     if (xpuntos.vueltas === true) { // vamos de vueltas
         document.getElementById("puntos").style.display = "block";
