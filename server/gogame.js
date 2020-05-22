@@ -587,7 +587,7 @@ class GoGame {
                 if (cartaGanadora.compara(carta, this.triunfo) === -1) { // ok si la mato
                     return true;
                 } else { // no mata
-                    if (paloArrastre === this.triunfo) { // el palo de arrastre es triunfo
+                    if (paloArrastre === this.triunfo.palo) { // el palo de arrastre es triunfo
                         return !this.tieneGanadora(resto , cartaGanadora, this.triunfo);
                     }
                     // el palo de arrastre no es triunfo
