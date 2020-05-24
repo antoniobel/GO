@@ -808,7 +808,7 @@ class GoGame {
                     }
                     break;
                 case 'M':
-                    if (this.vuelta) {
+                    if (this.vueltas) {
                         this.log[i].push('M 1 ' + this.puntos[0] + ' ' + this.puntos[1]);
                     } else {
                         this.log[i].push('M 0 0 0');
@@ -838,21 +838,21 @@ class GoGame {
         var i, j;
         for (i = 0; i < 4; i++) {
             valor === 20 ? j = 0 : j = 1;
-            this.log[i].push('N ' , index , ' ' + j + ' ' + (palo +1));
+            this.log[i].push('N ' + index + ' ' + j + ' ' + (palo +1));
         }
     }
 
     guardaLog7(tipo, index) {
         var i, j;
         for (i = 0; i < 4; i++) {
-            this.log[i].push('7 ' , index);
+            this.log[i].push('7 ' + index);
         }
     }
 
     guardaLogR(ganador) {
         var i, j;
         for (i = 0; i < 4; i++) {
-            this.log[i].push('R ' , ganador + ' ' + this.puntos[0] + ' ' + this.puntos[1]);
+            this.log[i].push('R ' + ganador + ' ' + this.puntos[0] + ' ' + this.puntos[1]);
         }
         this.saveFiles();
     }
