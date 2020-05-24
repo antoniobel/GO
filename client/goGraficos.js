@@ -994,15 +994,8 @@ function drawTextBG(ctx, txt, font, x, y) {
     ctx.font = font;
     /// draw text from top - makes life easier at the moment
     ctx.textBaseline = 'top';
-    /// color for background
-//    ctx.fillStyle = '#b0cfac';
+    // Letras en blanco.
     ctx.fillStyle = '#ffffff';
-    /// get width of text
-    var width = ctx.measureText(txt).width;
-    /// draw background rect assuming height of font
-    ctx.fillRect(x, y, width, parseInt(font, 10));
-    /// text color
-    ctx.fillStyle = '#000';
     /// draw text on top
     ctx.fillText(txt, x, y);
     /// restore original state
