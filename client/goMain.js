@@ -189,9 +189,6 @@ function conectar() {
                 if (message.code === 1) { // nombre repetido. hay que desconectarse.
                     nombreRepetido();
                 }
-                if (message.code === 2) { // partida comenzada. Esperar
-                    partidaComenzada();
-                }
             }
             if ('action' in message) {
                 if (message.action === "Jugadores") {
@@ -340,21 +337,6 @@ function nombreRepetido() {
         vaciaSelect(document.getElementById("pareja2"));
         } , 2000);                                
     room.leave();
-}
-
-/**
- * Se da un aviso de que la partida ya está comenzada. NO se puede entrar en la partida una vez empezada. Hay
- * que esperar a una nueva (un coto nuevo)
- */
-function partidaComenzada() {
-    console.log("La partida ya ha empezado. Tendrás que esperar.");
-    conectado = false;
-    var texto = "La partida ya ha empezado. Tendrás que esperar.";
-    document.getElementById("msg").innerHTML = texto;
-    document.getElementById("modalmsg").style.display = "block";
-    setTimeout(function() {
-        document.getElementById("modalmsg").style.display = "none";
-    } , 2000);                                
 }
 
 function requestSnapshot() {
