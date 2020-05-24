@@ -63,12 +63,14 @@ class MiCanvas {
 
     constructor() {
         this.fondo = new Image();
-        this.fondo.src = '../client/img/paperGreen.png';
+        this.fondo.src = '../client/img/paperGreen_xgf.png';
         this.fondo.addEventListener('load', () => {
-            // create pattern
-            var context = document.getElementById("canvas").getContext("2d");
-            this.ptrn = context.createPattern(this.fondo, 'repeat'); // Create a pattern with this image, and set it to "repeat".
-       }, false);    }
+            this.escalarFondo = false;
+            if (window.screen.width * window.devicePixelRatio > 1920) {
+                this.escalarFondo = true;
+            }
+       }, false);    
+    }
 
     fullScreen() {
         this.canvas().height = window.innerHeight - 20;
@@ -79,8 +81,13 @@ class MiCanvas {
 
     ponerFondo() {
         var context = document.getElementById("canvas").getContext("2d");
-        context.fillStyle = this.ptrn;
-        context.fillRect(0, 0, window.innerWidth / this.scale, window.innerHeight / this.scale); // context.fillRect(x, y, width, height);
+        this.context().setTransform(1, 0, 0, 1, 0, 0);
+        if (this.escalarFondo) {
+            context.drawImage(this.fondo, 0, 0, this.canvas().width , this.canvas().height);
+        } else {
+            context.drawImage(this.fondo, 0, 0);
+        }
+        this.context().scale(this.scale , this.scale);
     }
 
     fijarEscala() {
@@ -1003,21 +1010,11 @@ function drawTextBG(ctx, txt, font, x, y) {
 }
 var ui;
 
-var tick = new Date(); 
 /**
  * Dibuja todo el canvas. Primero dibuja las animaciones, si las hay, y después
  * los objetos estáticos: Jugador, baza, mazo y cartas ganadas.
  */
 function redibujar() {
-    if (navegador === 'Chrome' || navegador === 'Opera') { // para estos navegadoress, demasiadas llamadas a redibujar estropean el rendimiento
-        // No pasa en Firefox y Edge. Safari no se ha probado.
-        var t = new Date();
-        if (t.getTime() - tick.getTime() < 5) {
-            console.log(t.getTime() - tick.getTime());
-            return;
-        }
-        tick = t; 
-   }
     ui.canvas.ponerFondo();
     var i;
     // Dibujamos las animaciones primero
