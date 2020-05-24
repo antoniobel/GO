@@ -68,8 +68,8 @@ function posicionarBotones() {
 
     var puntos = document.getElementById("puntos");
     puntos.style.position = "absolute";
-    puntos.style.left = "10px";
-    puntos.style.top =  "10px";   
+    puntos.style.left = "15px";
+    puntos.style.top =  Math.floor(window.innerHeight - 100) + "px";
     puntos.style.display = "none";
     console.log("Fin Posicionar botones");
 }

@@ -171,3 +171,9 @@ div {
     font-size: 12px;
     background-color: transparent;
 }
+
+.puntos {
+    color: white;
+    font-size: 18px;
+/*    font-weight: bold; */
+  }
