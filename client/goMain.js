@@ -14,10 +14,7 @@ var usuariosConectados = []; // Todos los usuarios conectados. Debe coincidir co
 
 /* Programa principal */
 var ui = new UI();
-var movimiento = false;
-var navegador = navegador();
-console.log(navegador , navegadorOs());
-if (navegadorOs() === 'Windows' || navegadorOs() ==='Linux') movimiento = true;
+var movimiento = true;
 setInterval(ui.parpadeo , 600);    // Arranco el timer. Un solo timer para todas las partidas
 var conectado = false;
 shortcut.add("Ctrl+X",function() {
@@ -362,20 +359,4 @@ function partidaComenzada() {
 
 function requestSnapshot() {
     room.send({ action: "Snapshot" , data: nombreJugador});
-}
-
-function navegador() {
-    if((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1 ) return 'Opera';
-    if(navigator.userAgent.indexOf("Safari") != -1) return 'Safari';
-    if(navigator.userAgent.indexOf("Edge") != -1) return 'Edge';
-    if(navigator.userAgent.indexOf("Chrome") != -1 ) return 'Chrome';
-    if(navigator.userAgent.indexOf("Firefox") != -1 ) return 'Firefox';
-    return 'Desconocido';
-}
-
-function navegadorOs() {
-    console.log(navigator.userAgent);
-    if (navigator.userAgent.toLowerCase().indexOf("android") != -1) return "Android";
-    if (navigator.userAgent.toLowerCase().indexOf("windows") != -1) return "Windows";
-    if (navigator.userAgent.toLowerCase().indexOf("linux") != -1) return "Linux";
 }
