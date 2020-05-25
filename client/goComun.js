@@ -310,6 +310,12 @@ dialogoFinPartida() {
         document.getElementById("linea3").innerHTML  = this.partidaTerminada.parejas[1] + 
         " (" + this.partidaTerminada.puntos[1] + "): " + this.partidaTerminada.marcador[1];
     }
+    if (this.ui.jugadores[0].cartas.length > 0) {
+        for (i = 0; i < 4 ; i++) {
+            this.ui.jugadores[i].visible = true;
+        }
+        this.ui.dibujar();
+    }
     document.getElementById("modalfin").style.display = "block"; // abrimos el diálogo fin partida
 }
 
