@@ -170,6 +170,7 @@ class GJugador {
         this.turno = false;
         this.paloCantes = [];
         this.intervalId = 0;
+        this.calcularLongNombre();
     }
 
     init() {
@@ -257,10 +258,12 @@ class GJugador {
                 this.starty = this.margen;
                 this.giro = false;
                 // nombre
-                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
+//                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
+                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - this.longNombre - 35;
                 this.nombrey = 50 ;
                 // luz de turno
-                this.luzx = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
+//                this.luzx = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
+                this.luzx = this.nombrex;
                 this.luzy = 85 ;
                 // cantes
                 this.cantex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
@@ -299,6 +302,15 @@ class GJugador {
                 this.cantey = (this.ui.canvas.alto() - alto ) / 2 - this.ui.baraja.ancho()/2 - this.margen - 65;
                 break;    
         }
+    }
+
+    calcularLongNombre() {
+        var context = this.ui.canvas.context();
+        context.save();
+        context.font = "30px Arial";
+        this.longNombre = context.measureText(this.nombre).width;
+        context.restore();
+        console.log("Longitud nombre: " , this.longNombre);
     }
 
     ponerImagen(carta , x , y) {
