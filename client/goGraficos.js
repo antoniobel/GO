@@ -655,6 +655,7 @@ class UI {
         this.sounds = [];
         this.sounds[0] = new Audio('../client/img/playcard.mp3');
         this.sounds[1] = new Audio('../client/img/error.mp3');
+        this.chupito = new Chupito();
     }
 
     /**
@@ -1032,9 +1033,45 @@ function redibujar() {
     ui.baza.dibujar();
     ui.mazo.dibujar();
     ui.ganadas.dibujar();
+    ui.chupito.dibujar();
     // Si hay animaciones en marcha invocamos de nuevo redibujar para que continue.
     if (ui.animaciones.length > 0) {
         window.requestAnimationFrame(redibujar);
 //        setTimeout(redibujar , 20);
+    }
+}
+
+class Chupito {
+
+    constructor() {
+        this.imgs = [];
+        var i;
+        for (i = 0; i < 7; i++) {
+            this.imgs[i] = new Image();
+            this.imgs[i].src = '../client/img/chupito' + i + '.png';
+        }
+        this.current = -1;
+    }
+
+    ponerChupito() {
+        if (nombreJugador.toLowerCase().indexOf("rafa") >= 0 ||
+            nombreJugador.toLowerCase().indexOf("ferruz") >= 0) { // Rafa siempre chupito blanco.
+            this.current = 1;
+        } else {
+            this.current =  Math.floor(Math.random() * 7);
+        }
+    }
+
+    quitarChupito() {
+        this.current = -1;
+    }
+
+    dibujar() {
+        if (this.current >= 0) {
+            var context = ui.canvas.context();
+            var x = Math.floor(window.innerWidth - 210) / ui.canvas.escala();
+            var y = Math.floor(window.innerHeight - 180) / ui.canvas.escala() ;
+            context.drawImage(this.imgs[this.current], x , y);
+        }
     }
 }

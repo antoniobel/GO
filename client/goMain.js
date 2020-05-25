@@ -27,6 +27,14 @@ shortcut.add("Ctrl+A",function() {
         movimiento = true;
     }
 });
+shortcut.add("Alt+N",function() {
+    if (ui.chupito.current === -1) {
+        ui.chupito.ponerChupito();
+    } else {
+        ui.chupito.quitarChupito();
+    }
+    ui.dibujar();
+});
 posicionarBotones();
 abrirDialogoInicio();
 
