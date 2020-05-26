@@ -176,6 +176,14 @@ procesaAction(action, data) {
 }
 
 nuevaPartida(data) {
+    var i;
+    for (i = 0; i < 4; i++) {
+        if (this.ui.jugadores[i].nombre === nombreJugador) {
+            this.ui.jugadores[i].visible = true;
+        } else {
+            this.ui.jugadores[i].visible = false;
+        }
+    }
     document.getElementById("modalfin").style.display = "none";
     this.ui.init();
     this.ui.mazo.numCartas = 40;
