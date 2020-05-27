@@ -1,28 +1,27 @@
 {
-  "name": "guinote-server",
-  "version": "1.0.0",
-  "description": "Servidor para jugar al Guinote",
-  "main": "guinoteserver.js",
-  "scripts": {
-    "start": "node guinoteserver.js"
-  },
-  "engines": {
-    "node": ">=8.9.1"
-  },
-  "author": "Antonio Bel",
-  "license": "GPL-3.0",
-  "dependencies": {
-    "@colyseus/monitor": "^0.12.1",
-    "colyseus": "^0.12.4",
-    "cookie-parser": "^1.4.4",
-    "cors": "^2.8.5",
-    "express": "^4.14.0",
-    "serve-index": "^1.8.0",
-    "superagent": "^3.8.1"
-  },
-  "devDependencies": {
-    "browserify": "^14.4.0",
-    "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "name": "guinote-server",
+    "version": "1.0.0",
+    "description": "Servidor para jugar al Guinote",
+    "main": "guinoteserver.ts",
+    "scripts": {
+      "start": "ts-node guinoteserver.ts"
+    },
+    "engines": {
+      "node": ">=8.9.1"
+    },
+    "author": "Antonio Bel",
+    "license": "GPL-3.0",
+    "dependencies": {
+      "@colyseus/monitor": "^0.12.1",
+      "colyseus": "^0.13.0",
+      "cors": "^2.8.5",
+      "express": "^4.14.0",
+      "serve-index": "^1.8.0",
+      "superagent": "^3.8.1"
+    },
+    "devDependencies": {
+      "ts-node": "^8.10.1",
+      "typescript": "^3.5.3"
+    }
   }
-}
+  
