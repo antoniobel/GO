@@ -3,38 +3,37 @@
  */
 "use strict";
 
-const Handler = require("./handler").Handler;
-const Baraja = require("./gobase").Baraja;
-const Jugador = require("./gobase").Jugador;
-const Carta = require("./gobase").Carta;
-var fs = require('fs');
-var os = require("os");
+import { Handler } from "./handler";
+import { Carta , Baraja , Jugador } from "./gobase";
+import fs from 'fs';
+import os from 'os';
 
-class GoGame {
-    /* Variables
-     * this.gameStarted => indica si la partida ha empezado o no
-     * this.handler => Room - gestiona comunicación entre el servidor y los clientes (Colyseus)
-     * this.jugadores [] => Array de jugadores 
-     * this.publico [] => usuarios conectados que no están jugando (espectadores)
-     * this.baraja
-     * this.orden [] => orden de juego (array con los indices del array de jugadores). Es el orden de juego de la
-     *               primera ronda. Al final de cada ronda se actualiza dependiendo de quien haya ganado la baza.
-     * this.triunfo => carta triunfo
-     * this.ronda => ronda de juego (de 1 a 10)
-     * this.turno => turno de juego (de 0 a 3, es el indice del array de orden)
-     * this.baza [] => array con las cartas de la baza actual
-     * this.puntos [] => array con los puntos de la pareja 0 => pareja(0/2) y 1 => pareja(1/3)
-     * this.ganadorBaza => indice del array de jugadores con el ganador de la última baza
-     * this.partidaVuelta => booleano. true si es partida de vuelta
-     * this.cartasRecogidas [] => cartas recogidas por cada pareja Mismo esquema que this.puntos
-     * this.vueltas => flag, true para partida de vueltas, false, partida de idas.
-     * this.marcador [] => dos elementos. partidas de una pareja y de otra
-     * this.partidaTerminada => flag que indica que la partida ha terminado. Se usa para las partidas de vueltas.
-     * this.indiceGanador => indice del array jugadores que ha ganado la última baza
-     * this.nombresPareja [] => dos elementos. cada elemento contiene concatenados los nombres de la pareja. 
-     * this.log[] => fichero de log. Array. Un elemento por jugador.
-     */
-    constructor(handler) {
+export class GoGame {
+
+    private baraja: Baraja; // Baraja (Mazo de cartas)
+    private baza: Array<Carta>; // array con las cartas de la baza actual. La primera carta es del jugador que ha jugado primero, etc.
+    private cartasRecogidas: Array<Array<Carta>>; // cartas recogidas por cada pareja Mismo esquema que this.puntos
+    private errorCounter: number; // Contador de errores para las cartas jugadas fuera de turno.
+    private flagCartaJugada: boolean; // true si el jugador con el turno ya ha tirado carta (Para evitar mensajes duplicados)
+    public gameStarted: boolean; // true si el coto ha comenzado
+    private handler: Handler; // Room - gestiona comunicación entre el servidor y los clientes (Colyseus)
+    private indiceGanador: number; // indice del array jugadores del jugador que ha ganado la última baza
+    private jugadores: Array<Jugador>; // Array de jugadores 
+    private log: Array<Array<string>>; // log de la partida. 4 elementos uno por jugador.
+    private marcador: Array<number>; // dos elementos. partidas ganadas de una pareja y de otra
+    private nombresPareja: Array<string>; // dos elementos. cada elemento contiene concatenados los nombres de la pareja. 
+    private partidasCoto: number; // Número de partidas necesarias para ganar un coto.
+    private partidaTerminada: boolean; // flag que indica que la partida ha terminado. Se usa para las partidas de vueltas.
+    private orden: Array<number>; // orden de juego (array con los indices del array de jugadores). 
+    private publico: Array<Jugador>; // Array de clientes que entran como público en la partida.
+    private puntos: Array<number>; // array con los puntos de la pareja 0 => pareja(0/2) y 1 => pareja(1/3)
+    private ronda: number; // ronda de juego (de 1 a 10)
+    private sincroCartas: Array<string>; // array con los nombres de los jugadores que hay devuelto el ok para la sincronizacion.
+    private triunfo: Carta; // carta triunfo
+    private turno: number; // turno de juego (de 0 a 3, es el indice del array orden)
+    private vueltas: boolean; // true si es una partida de vueltas
+
+    constructor(handler: Handler) {
         this.handler = handler;
         this.gameStarted = false;
         this.vueltas = false;
@@ -44,7 +43,7 @@ class GoGame {
      * Incorpora al juego un espectador una vez que la partida ha comenzado.
      * @param {*} nombre - nombre del espectador que se incorpora.
      */
-    incorporar(nombre) {
+    incorporar(nombre: string) {
         var nombres = [];
         this.jugadores.forEach(jugador => {
             nombres.push(jugador.nombre);
@@ -75,7 +74,7 @@ class GoGame {
      * @param nombre - jugador que envia el mensaje 
      * @param data - mensaje
      */
-    messageReceiver(nombre, mensaje) {
+    messageReceiver(nombre: string, mensaje: any) {
         if (mensaje.action === "ComienzaPartida" && this.handler.state.players.length >= 4 && this.gameStarted === false) {
             this.gameStarted = true;
             this.obtenerJugadores(mensaje);
@@ -210,10 +209,10 @@ class GoGame {
      * crea la lista de espectadores (publico) con los demas jugadores, del array handler.state.players
      * que no han sido incluidos en el array de jugadores.
      */
-    obtenerJugadores(mensaje) {
+    obtenerJugadores(mensaje: any) {
         this.jugadores = [];
         this.publico = [];
-        var i , n;
+        var i: number , n: string;
         for (i = 0 ; i < mensaje.datos.length ; i++) {
             this.jugadores.push(new Jugador(mensaje.datos[i]));
         }
@@ -230,8 +229,8 @@ class GoGame {
         this.nombresPareja[1] = this.jugadores[1].nombre + " y " + this.jugadores[3].nombre;
     }
 
-    esJugador(nombre) {
-        var i;
+    esJugador(nombre: string): boolean {
+        var i: number;
         if (this.jugadores == null) { // No hay partida
             return false;
         }
@@ -248,7 +247,7 @@ class GoGame {
      * @param {*} nombre  del jugador que ha tirado la carta
      * @param {*} carta carta que ha tirado.
      */
-    cartaJugada(nombre , carta) {
+    cartaJugada(nombre: string  , carta: Carta) {
         if (this.flagCartaJugada) {
             console.log('Carta repetida. Me voy');
             return; // Es una carta repetida. Ya hay una en proceso. Prevenir incidente ticket #35
@@ -257,7 +256,7 @@ class GoGame {
         if (index === this.orden[this.turno]) { // compruebo que el jugador tiene el turno
             this.errorCounter = 0; 
             if (this.cartaValida(carta , index)) { // ver si la carta es valida
-                var i; // elimino la carta del jugador
+                var i: number; // elimino la carta del jugador
                 for (i=0 ; i< this.jugadores[index].cartas.length; i++) {
                     if (carta.id === this.jugadores[index].cartas[i].id) {
                         this.jugadores[index].cartas.splice(i,1);
@@ -291,7 +290,7 @@ class GoGame {
         } , 600);
     }
 
-    cartaJugadaOk(nombre) {
+    cartaJugadaOk(nombre: string) {
         this.sincroCartas.push(nombre);
         if (this.sincroCartas.length >= 4) {
             console.log("Tengo 4 cartas ok");
@@ -426,15 +425,15 @@ class GoGame {
     /**
      * Invocado por la acción canto, cuando un jugador quiere cantar sus cantes.
      */
-    canto(nombre) {
-        var index = this.getJugadorIndex(nombre);
+    canto(nombre: string) {
+        var index: number = this.getJugadorIndex(nombre);
         if (this.indiceGanador < 0) return;
         var secuencia = 0; // Para indicar los cantes multiples
         if (this.indicePareja(index) === this.indicePareja(this.indiceGanador)) {
             var palo = this.jugadores[index].cantar(this.ronda);
             while (palo >= 0) {
                 secuencia++;
-                var valor = 20;
+                var valor: number = 20;
                 if (palo === this.triunfo.palo) {
                     valor = 40;
                 }
@@ -467,7 +466,7 @@ class GoGame {
         }
     }
 
-    cambio7(nombre) {
+    cambio7(nombre: string) {
         var index = this.getJugadorIndex(nombre);
         if (this.indiceGanador < 0) return;
         if (this.indicePareja(index) === this.indicePareja(this.indiceGanador)) {
@@ -483,7 +482,7 @@ class GoGame {
         }
     }
 
-    enviarEvento(nombre  , mensaje) {
+    enviarEvento(nombre: string  , mensaje: any) {
         if (this.handler != null) {
             var d = new Date();
             console.log(d.getTime() , "Enviar evento: ->" , nombre , "<-" , mensaje.action);
@@ -503,8 +502,8 @@ class GoGame {
      * con cada carta repartida y se decalan en el tiempo para que puedan ser procesados por el cliente.
      * Devuelve el valor de time que ha usado para el timeout de reparto.
      */
-    repartirCartas() {
-        var i,j,k, time = 0, carta;
+    repartirCartas(): number {
+        var i: number , j: number , k: number, time = 0, carta: Carta;
         for (i= 0 ; i < 2; i++) {
             for (j = 0; j < 4; j++) {
                 var indice = this.orden[j];
@@ -523,7 +522,7 @@ class GoGame {
      * Reparte a los jugadores una carta y le envia la action Dar1Carta
      */
     repartir1Carta() {
-        var j, carta, time = 0;
+        var j: number, carta: Carta, time = 0;
         for (j = 0; j < 4 ; j++) {
             carta = this.baraja.cogerCarta();
             this.jugadores[this.orden[j]].tomaCarta(carta);
@@ -536,7 +535,7 @@ class GoGame {
     /**
      * Método que envia la carta al servidor
      */
-    enviar1Carta(game , nombre, id) {
+    enviar1Carta(game: GoGame , nombre: string , id: number) {
         game.enviarEvento('' , { action: "Dar1Carta", data: {jugador: nombre , carta: id }});
     }
 
@@ -544,7 +543,7 @@ class GoGame {
      * Devuelve el indice del array de jugadores, pasando el nombre del jugador.
      * @param {*} nombre 
      */
-    getJugadorIndex(nombre) {
+    getJugadorIndex(nombre: string): number {
         var i;
         for (i = 0; i < this.jugadores.length ; i++) {
             if (this.jugadores[i].nombre === nombre) {
@@ -559,7 +558,7 @@ class GoGame {
      * @param {*} carta - carta a validar
      * @param {*} index - indice del jugador que juega.
      */
-    cartaValida(carta , index) {
+    cartaValida(carta: Carta , index: number): boolean {
         if (this.ronda < 5 || this.baza.length == 0) { // siempre valida para las 4 primeras rondas o para el primero en jugar
             return true; // en el arrastre comprobar si la carta es válida
         }
@@ -614,7 +613,7 @@ class GoGame {
     /**
      * Devuelve true si en el array cartas (primer parámetro), hay alguna carta del palo (segundo parametro) 
      */
-    hayPalo(cartas, palo) {
+    hayPalo(cartas: Array<Carta>, palo: number): boolean {
         var result = false;
         cartas.forEach(c => {
             if (c.palo === palo) {
@@ -627,7 +626,7 @@ class GoGame {
     /**
      * Devuelve true si en cartas hay alguna que mata a carta, teniendo en cuenta el triunfo (3er parametro)
      */
-    tieneGanadora(cartas , carta , triunfo) {
+    tieneGanadora(cartas: Array<Carta> , carta: Carta , triunfo: Carta): boolean {
         var result = false;
         cartas.forEach( c => {
             if (carta.compara(c, triunfo) === -1) {
@@ -642,9 +641,9 @@ class GoGame {
      * en el array this.baza y el orden de juego en el array this.orden
      * @returns 
      */
-    calculaGanadorBaza() {
+    calculaGanadorBaza(): number {
         var indiceGanador = 0; // en principio manda el que sale.
-        var i;
+        var i: number;
         for (i = 1; i < this.baza.length; i++) {
             var carta1 = this.baza[indiceGanador];
             var carta2 = this.baza[i];
@@ -655,9 +654,9 @@ class GoGame {
         return this.orden[indiceGanador]; 
     }
 
-    indiceGanadorBaza() {
+    indiceGanadorBaza(): number {
         var indiceGanador = 0; // en principio manda el que sale.
-        var i;
+        var i: number;
         for (i = 1; i < this.baza.length; i++) {
             var carta1 = this.baza[indiceGanador];
             var carta2 = this.baza[i];
@@ -672,7 +671,7 @@ class GoGame {
      * Acumula los puntos de la baza
      * @param {*} indiceGanador 
      */
-    acumulaPuntos(indiceGanador) {
+    acumulaPuntos(indiceGanador: number) {
         this.baza.forEach(carta => {
             this.puntos[this.indicePareja(indiceGanador)] += carta.puntos();
         });
@@ -683,7 +682,7 @@ class GoGame {
      * @param {type} indiceGanador 
      * @returns {undefined}
      */
-    recogeCartas(indiceGanador) {
+    recogeCartas(indiceGanador: number) {
         // Pone el flag de recoger cartas si es necesario
         if (this.jugadores[indiceGanador].recogeCartas == false &&
             this.jugadores[this.miPareja(indiceGanador)].recogeCartas == false) {
@@ -694,7 +693,7 @@ class GoGame {
             this.cartasRecogidas[pareja].push(carta);
         });
         this.baza = [];
-        var nombre;
+        var nombre: string;
         if (this.jugadores[indiceGanador].recogeCartas == true) {
             nombre = this.jugadores[indiceGanador].nombre;
             this.enviarEvento('' , { action: "RecogeCartas" , data: nombre});
@@ -708,9 +707,9 @@ class GoGame {
      * Fija el orden de juego, colocando como primer jugador el valor que se pasa como parámetro.
      * Los siguientes son correlativos
      */
-    fijarOrden(primero) {
+    fijarOrden(primero: number) {
         this.orden[0] = primero;
-        var i;
+        var i: number;
         for (i = 1; i < 4 ; i++) {
             this.orden[i] = this.orden[i-1] +1;
             if (this.orden[i] > 3) {
@@ -722,7 +721,7 @@ class GoGame {
     /**
      * Devuelve true si alguna de las parejas ha llegado a los 101 puntos. false en caso contrario.
      */
-    hayGanador() {
+    hayGanador(): boolean {
         if (this.puntos[0] > 100 || this.puntos[1] > 100) {
             return true;
         }
@@ -735,7 +734,7 @@ class GoGame {
      * - Si es partida de vueltas el que tiene más puntos.
      * @param {*} indiceGanador - indice del jugador que ha ganado la última baza.
      */
-    parejaGanadora(indiceGanador) {
+    parejaGanadora(indiceGanador: number): number {
         if (this.vueltas == true) {
             if (this.puntos[0] > this.puntos[1]) {
                 return 0;
@@ -758,7 +757,7 @@ class GoGame {
     /**
      * Añade las 10 de últimas a la pareja ganadora de la última baza
      */
-    pon10Ultimas(ultimoGanador) {
+    pon10Ultimas(ultimoGanador: number) {
         this.puntos[this.indicePareja(ultimoGanador)] += 10;
     }
 
@@ -767,7 +766,7 @@ class GoGame {
      * devuelve el indice del array que es su pareja.
      * Es decir si index es 0, devuelve 2, si es 1, devuelve 3, etc.
      */
-    miPareja(index) {
+    miPareja(index: number): number {
         switch (index) {
             case 0:
                 return 2;
@@ -786,7 +785,7 @@ class GoGame {
      * Osea si si index es 0 o 2, devuelve 0, si es 1 o 3 devuelve 1
      * @param {*} index 
      */
-    indicePareja(index) {
+    indicePareja(index: number): number {
         switch (index) {
             case 0:
             case 2:
@@ -798,8 +797,8 @@ class GoGame {
         return -1;
     }
 
-    guardaLog(tipo) {
-        var i, j;
+    guardaLog(tipo: string) {
+        var i: number, j: number;
         for (i = 0; i < 4; i++) {
             switch (tipo) {
                 case 'I':
@@ -834,23 +833,23 @@ class GoGame {
        }
     }
 
-    guardaLogCante(tipo , index, valor , palo) {
-        var i, j;
+    guardaLogCante(tipo:string , index: number, valor: number , palo: number) {
+        var i: number, j: number;
         for (i = 0; i < 4; i++) {
             valor === 20 ? j = 0 : j = 1;
             this.log[i].push('N ' + index + ' ' + j + ' ' + (palo +1));
         }
     }
 
-    guardaLog7(tipo, index) {
-        var i, j;
+    guardaLog7(tipo: string, index: number) {
+        var i: number, j: number;
         for (i = 0; i < 4; i++) {
             this.log[i].push('7 ' + index);
         }
     }
 
-    guardaLogR(ganador) {
-        var i, j;
+    guardaLogR(ganador: any) {
+        var i: number, j: number;
         for (i = 0; i < 4; i++) {
             this.log[i].push('R ' + ganador + ' ' + this.puntos[0] + ' ' + this.puntos[1]);
         }
@@ -858,8 +857,8 @@ class GoGame {
     }
 
     saveFiles() {
-        var nombre , d , i , path,  todo;
-        d = new Date();
+        var nombre: string , i: number , path: string,  todo: string;
+        var d = new Date();
         nombre = 'F' + d.getFullYear() + '.' + (d.getMonth()+1) + '.' + d.getDate() + "-" + d.getHours() + "." + d.getMinutes() + 
                 '.' + d.getSeconds() + '_';
         for (i = 0; i < 4; i++) {
@@ -876,22 +875,22 @@ class GoGame {
         }        
     }
 
-    snapshot(nombre) {
+    snapshot(nombre: string) {
         if (this.triunfo == null) {
             this.handler.clock.setTimeout(() => {
                 this.snapshot(nombre);
             } , 1000);  
             return;          
         }
-        var xnombres = [];
-        var xcartas = [];
-        var xcantes = [];
+        var xnombres: Array<string> = [];
+        var xcartas: Array<Array<number>> = [];
+        var xcantes: Array<Array<number>> = [];
         var nCartas = this.baraja.cartas.length;
 //        this.baraja.cartas.length > 0 ? nCartas = this.baraja.cartas.length - 1 : nCartas = 0;
         var xmazo = { triunfo: this.triunfo.id , numCartas : nCartas};
         this.jugadores.forEach(jugador => {
             xnombres.push(jugador.nombre);
-            var cartasJugador = [];
+            var cartasJugador: Array<number> = [];
             jugador.cartas.forEach(carta => {
                 cartasJugador.push(carta.id);
             }) 
@@ -906,7 +905,7 @@ class GoGame {
             i++;
         })
         var xbaza = {cartas: bazaCartas, nombres: bazaNombres};
-        var xturno;
+        var xturno: string;
         if (this.turno <= 3) {
             xturno = this.jugadores[this.orden[this.turno]].nombre;
         }
@@ -919,16 +918,14 @@ class GoGame {
         this.enviarEvento(nombre , { action: 'Snapshot' , data: data });
     }
 
-    revisionBaza(nombre) {
+    revisionBaza(nombre: string) {
         var indicePareja = this.indicePareja(this.getJugadorIndex(nombre));
         if (this.cartasRecogidas[indicePareja].length === 0) return;
         var ultimaBaza = [];
-        var i;
+        var i: number;
         for (i = this.cartasRecogidas[indicePareja].length - 4; i < this.cartasRecogidas[indicePareja].length; i++) {
             ultimaBaza.push(this.cartasRecogidas[indicePareja][i].id);
         }
         this.enviarEvento('' , { action: 'RevisionBaza' , data: {nombre: nombre , ultimaBaza: ultimaBaza }});
     }
 }
-exports.GoGame = GoGame;
-
