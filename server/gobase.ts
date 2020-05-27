@@ -8,36 +8,39 @@ var _puntos = [11 , 0 , 10 , 0 , 0 , 0 , 0 , 3 , 2 , 4];
 var _palos = ["oros" , "copas" , "espadas" , "bastos"];
 var _valores = ["as" , "dos" , "tres" , "cuatro" , "cinco" , "seis" , "siete" , "sota" , "caballo" , "rey"];
 
-class Carta {
+export class Carta {
     
+    readonly  id: number;
+    readonly  palo: number;
+    readonly  valor: number;
+
     /**
      * los palos van del 0 al 3 y los valores del 0 al 9
      * @param {type} id
-     * @returns {nm$_gobase.Carta}
      */
-    constructor(id) {
+    constructor(id: number) {
         this.id = id;
         this.palo = Math.floor(id / 10);
         this.valor = id % 10;
     }
     
-    paloString() {
+    paloString(): string {
         return _palos[this.palo];
     }
     
-    valorString() {
+    valorString(): string {
         return _valores[this.valor];
     }
     
-    puntos() {
+    puntos(): number {
         return _puntos[this.valor];
     }
     
-    toString() {
+    toString(): string {
         return this.valorString() + " de " + this.paloString();
     }
     
-    getId() {
+    getId(): number {
         return this.id;
     }
         
@@ -50,7 +53,7 @@ class Carta {
      * @param triunfo - carta que marca el triunfo
      * @returns {undefined}
      */
-    compara(carta, triunfo) {
+    compara(carta: Carta, triunfo: Carta): number {
         // Si son del mismo palo el valor mayor manda (da igual si es triunfo o no)
         if (this.palo === carta.palo) {
             if (_ranking[this.valor] > _ranking[carta.valor]) {
@@ -75,16 +78,14 @@ class Carta {
     }
 
 }
-try {
-   exports.Carta = Carta;
-} catch (e) {}
 
-
-class Baraja {
+export class Baraja {
     
+    public cartas: Array<Carta>;
+
     constructor() {
         this.cartas = [];
-        var i , j;
+        var i: number , j: number;
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 10; j++) {
                 this.cartas.push(new Carta(i * 10 + j));
@@ -113,7 +114,7 @@ class Baraja {
     } */
     
     barajar() {
-        var i , carta , newi;
+        var i: number , carta: Carta , newi: number;
         for (i = this.cartas.length - 1; i > 0 ; i--) {
             newi = Math.floor(Math.random() * (i+1));
             carta = this.cartas[i];
@@ -122,30 +123,27 @@ class Baraja {
         }
     } 
     
-    cogerCarta() {
+    cogerCarta(): Carta {
         return this.cartas.shift();
     }
     
-    devolverCarta(carta) {
+    devolverCarta(carta: Carta) {
         this.cartas.push(carta);
     }
     
     // Devuelve la última carta de la baraja, pero sin quitarla.
-    triunfo() {
+    triunfo(): Carta {
         return this.cartas[this.cartas.length -1];
     }
 
-    paloToString(i) {
+    paloToString(i: number): string {
         return _palos[i];
     }
 
-    valorToString(i) {
+    valorToString(i: number): string {
         return _valores[i];
     }
 }
-try {
-   exports.Baraja = Baraja;
-} catch (e) {}
 
 /**
  * this.nombre - Nombre del jugador
@@ -155,20 +153,27 @@ try {
  * this.cantes [] - Los cantes que tiene el jugador en un momento dado en la mano. Pueden estar ya cantados o no. 
  *                  Calculado por el método calcularCantes.
  */
-class Jugador {
+export class Jugador {
 
-    constructor(nombre) {
+    readonly nombre: string;
+    public cartas: Array<Carta>;
+    public recogeCartas: boolean;
+    private cantes: Array<number>;
+    public cantesCantados: Array<number>;
+
+    constructor(nombre: string) {
         this.nombre = nombre;
         this.cartas = [];
         this.recogeCartas = false;
     }
     
-    tomaCarta(carta) {
+    tomaCarta(carta: Carta) {
         this.cartas.push(carta);
     }
     
-    jugarCarta(i) {
-        return this.cartas.splice(i , 1);
+    jugarCarta(i: number): Carta {
+        var borrados: Array<Carta> = this.cartas.splice(i , 1);
+        return borrados[0];
     }
     
     inicioPartida() {
@@ -176,9 +181,9 @@ class Jugador {
         this.recogeCartas = false;
         this.cantes = [];
         this.cantesCantados = [];
-        var i;
+        var i: number;
         for (i = 0; i < 4; i++) {
-            this.cantes[i] = false;
+            this.cantes[i] = 0;
             this.cantesCantados[i] = 0;
         }
     }
@@ -189,7 +194,7 @@ class Jugador {
     calcularCantes() {
         var patas = [];
         this.cantes = [];
-        var i;
+        var i: number;
         for (i = 0; i < 4; i++) {
             patas[i] = 0;
             this.cantes[i] = 0;
@@ -211,7 +216,7 @@ class Jugador {
      */
     cantesPendientes() {
         this.calcularCantes();
-        var i;
+        var i: number;
         for (i = 0; i < 4; i++) {
             if (this.cantes[i] - Math.abs(this.cantesCantados[i]) > 0) {
                 return true;
@@ -223,12 +228,12 @@ class Jugador {
      * Canta el primer cante que tenga pendiente. Sólo hace un cante. si hay más hay que volver a invocar el método.
      * Devuelve el palo que ha cantado. Si no tiene nada para cantar devuelve -1; 
      */
-    cantar(ronda) {
+    cantar(ronda: number): number {
         var pendientes = this.cantesPendientes();
         if (!pendientes) {
             return -1;
         }
-        var i;
+        var i: number;
         for (i = 0; i < 4; i++) {
             if (this.cantes[i] - Math.abs(this.cantesCantados[i]) > 0) {
                 (ronda < 5) ? this.cantesCantados[i] = 1 : this.cantesCantados[i] = -1;
@@ -242,9 +247,9 @@ class Jugador {
      * Devuelve true si tiene el 7 del mismo palo que la carta de triunfo (que se pasa como parámetro) y ademas el valor de
      * la carta de triunfo es as, 3, sota, caballo o rey.
      */
-    cambio7Posible(triunfo) {
+    cambio7Posible(triunfo: Carta) {
         if (triunfo.valor === 0 || triunfo.valor === 2 || triunfo.valor > 6) {
-            var i;
+            var i: number;
             var paloTriunfo = triunfo.palo;
             for (i = 0; i < this.cartas.length; i++) {
                 if (this.cartas[i].palo === paloTriunfo && this.cartas[i].valor === 6) {
@@ -255,8 +260,8 @@ class Jugador {
         return false;
     }
 
-    cambia7(carta) {
-        var i;
+    cambia7(carta: Carta): Carta {
+        var i: number;
         for (i = 0; i < this.cartas.length; i++) {
             if (this.cartas[i].valor === 6 && this.cartas[i].palo === carta.palo) {
                 var c = this.cartas[i];
@@ -274,7 +279,3 @@ class Jugador {
         });
     }
 }
-
-try {
-   exports.Jugador = Jugador;
-} catch (e) {}
