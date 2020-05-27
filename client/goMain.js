@@ -185,14 +185,14 @@ function conectar() {
     client.joinOrCreate("go_room" , { nombre: nombreJugador}).then(room_instance => {
         room = room_instance; // para poder manejarla fuera del then     
         conectado = true;              
-        room.onMessage(function(message) {
+        room.onMessage("mensajeGo" , function(message) {
             var d = new Date();
             console.log(d.getTime() , message);
             if ('ping' in message) {
-                room.send({ping: 0});
+                enviarMensaje({ping: 0});
                 return;
             }
-            room.send({echo: message}); // Funcion eco. Mantener para verificar el log en el servidor. 
+            enviarMensaje({echo: message}); // Funcion eco. Mantener para verificar el log en el servidor. 
             if ('code' in message) {
                 if (message.code === 1) { // nombre repetido. hay que desconectarse.
                     nombreRepetido();
@@ -274,7 +274,7 @@ function comenzar() {
     jugadores.push(pareja2.options[0].label);
     jugadores.push(pareja1.options[1].label);
     jugadores.push(pareja2.options[1].label);
-    room.send({ action: "ComienzaPartida" , datos: jugadores });
+    enviarMensaje({ action: "ComienzaPartida" , datos: jugadores });
 }
 
 function canvasClicked(e) {
@@ -348,5 +348,9 @@ function nombreRepetido() {
 }
 
 function requestSnapshot() {
-    room.send({ action: "Snapshot" , data: nombreJugador});
+    enviarMensaje({ action: "Snapshot" , data: nombreJugador});
+}
+
+function enviarMensaje(data) {
+    room.send("mensajeGo" , data);
 }
