@@ -1,19 +1,24 @@
 /*
  * Copyright (C) 2020 Antonio Bel Puchol
  */
-const colyseus = require("colyseus");
-const schema = require("@colyseus/schema");
-const GoGame = require("./gogame").GoGame;
+import http from "http";
+import { Room, Client } from "colyseus";
+import { Schema, type, ArraySchema } from "@colyseus/schema";
+import { GoGame } from "./gogame"; 
 
-class Player extends schema.Schema {
-    constructor(nombre, id) {
+class Player extends Schema {
+    @type("string")
+    nombre: string;
+
+    @type("string")
+    id: string;
+
+    constructor(nombre: string , id: string) {
         super();
         this.nombre = nombre;
         this.id = id;
     }
 };
-schema.defineTypes(Player, {nombre: "string"});
-schema.defineTypes(Player, {id: "string" });
 
 /* State es la clase que mantiene los datos de estado de juego. Estos 
  * datos son los que se trasladan a los clientes cuando alguno de ellos
@@ -22,18 +27,21 @@ schema.defineTypes(Player, {id: "string" });
  * Todos los eventos del juego se proporcionan via broadcast o send en 
  * lugar de sincronizar datos.
  */
-class State extends schema.Schema {    
-    constructor (room) {
+export class State extends Schema {  
+    @type( [ Player ])
+    players: ArraySchema<Player>;
+
+    constructor () {
         super();
-        this.players = new schema.ArraySchema();
+        this.players = new ArraySchema();
     }
     
-    createPlayer (id , nombre) {
+    createPlayer (id:string , nombre: string) {
         this.players.push(new Player(nombre , id));
     }
         
-    removePlayer(id) {
-        var i;
+    removePlayer(id: string) {
+        var i: number;
         for (i = 0; i < this.players.length; i++) {
             if (this.players[i].id === id) {
                 this.players.splice(i,1);
@@ -43,10 +51,15 @@ class State extends schema.Schema {
     }
 
 };
-schema.defineTypes(State, {players: [Player]});
-exports.State = State;
 
-class Handler extends colyseus.Room {
+export class Handler extends Room {
+
+    game: GoGame;
+    pingContinue: boolean;
+    pingFlag: boolean;
+    colaFallos: Array<string>;
+    pings: Array<string>;
+
     constructor() {
         super();
         this.setSeatReservationTime(30);
@@ -61,15 +74,16 @@ class Handler extends colyseus.Room {
         this.colaFallos = [];
         this.clock.setTimeout(this.pingSend, 5000 , this);
         console.log("Ping iniciado");
+        this.onMessage("*", (client, type, message) => { 
+            this.recibeMensaje(client, message);
+        });
     }
     
-    onAuth(client, options, req) {
-//        console.log(req.headers.cookie);
+    onAuth(client: Client, options: any , req: http.IncomingMessage) {
         return true;
     }
 
-    onJoin (client, options) {
-//        this.send(client, { message: "Bienvenido " + options.nombre});
+    onJoin (client: Client, options: any) {
         if (this.getClient(options.nombre) === undefined) { // Verificamos que no haya otro cliente con el mismo nombre
             this.state.createPlayer(client.sessionId , options.nombre);
             console.log('Cliente ' + options.nombre + ' conectado. sessionId: ' + client.sessionId);
@@ -77,28 +91,34 @@ class Handler extends colyseus.Room {
             if (this.game.gameStarted) { // Si la partida ha comenzado, incorporar al juego.
                 this.game.incorporar(options.nombre);
             }
-            this.broadcast({conexiones: this.state.players});        
+            this.sendAll( {conexiones: this.state.players} );        
         } else { // si lo hay, lo echamos.
             console.log("Nombre repetido " + options.nombre + ". Desconectamos "+ client.sessionId);
-            this.send(client , { message: "Desconectado. Nombre repetido " + options.nombre , code: 1 });
-            this.broadcast({conexiones: this.state.players});        
+            client.send("mensajeGo" , { message: "Desconectado. Nombre repetido " + options.nombre , code: 1 });
+            this.sendAll( {conexiones: this.state.players} );        
         }
     }
 
-    onLeave (client) {
+    onLeave (client: Client) {
         console.log("Cliente " + client.sessionId + " desconectado");
         var nombre = this.getName(client.sessionId);
         var esJugador = this.game.esJugador(nombre); // miro si es jugador antes de quitarlo de la lista
         this.state.removePlayer(client.sessionId);
-        this.broadcast({conexiones: this.state.players}); 
+        this.sendAll( {conexiones: this.state.players} ); 
         if (this.game.gameStarted) {
             if (esJugador) {
-                this.broadcast({action: "JugadorDesconectado" , data: nombre});        
+                this.sendAll( {action: "JugadorDesconectado" , data: nombre} );        
             }
         }       
     }
 
-    onMessage (client, data) {
+    /**
+     * Función de callback que se ejecuta cuando se recibe un mensaje del cliente. El callback se declara en
+     * el metodo onCreate (llamada a this.onMessage)
+     * @param client 
+     * @param data 
+     */
+    recibeMensaje (client:Client , data: any) {
         if ('ping' in data) {
             this.pingReceived(client);
             return;
@@ -123,27 +143,28 @@ class Handler extends colyseus.Room {
         console.log("Ping finalizado");
     }
 
-    sendAll(message) {
-        this.broadcast(message);        
+    sendAll(message:any) {
+        this.broadcast("mensajeGo" , message);        
     }
     
-    sendOne(nombre, message) {
+    sendOne(nombre:string, message: any) {
         var clientId = this.getClient(nombre);
         if (clientId != null) {
-            this.send(this.getClient(nombre) , message);
+            var c: Client = this.getClient(nombre);
+            c.send("mensajeGo" , message);
         } else {
             console.log("Cliente " + nombre + " desconectado. No se envia evento " , message);
         }
     }
     
-    sendAllButOne(nombre, message) {
+    sendAllButOne(nombre: string, message: any) {
         var client = this.getClient(nombre);
         this.broadcast(message, { except: client });
     }
     
-    getName(id) {
-        var name;
-        this.state.players.forEach( player => {
+    getName(id: string): string {
+        var name: string;
+        this.state.players.forEach( (player: Player) => {
             if (player.id === id) {
                 name = player.nombre;
             }
@@ -151,9 +172,9 @@ class Handler extends colyseus.Room {
         return name;
     }
     
-    getClient(nombre) {
-        var c;
-        this.state.players.forEach(ele => {
+    getClient(nombre: string): Client {
+        var c: Client;
+        this.state.players.forEach( (ele: Player) => {
             if (ele.nombre === nombre) {
                 var id = ele.id;
                 this.clients.forEach( client => {
@@ -166,8 +187,8 @@ class Handler extends colyseus.Room {
         return c;
     }
 
-    getClientConId(id) {
-        var c;
+    getClientConId(id: string): Client {
+        var c: Client;
         this.clients.forEach( client => {
             if (client.sessionId === id) {
                 c = client;
@@ -176,14 +197,14 @@ class Handler extends colyseus.Room {
          return c;
     }
 
-    pingSend(handler) {
+    pingSend(handler: Handler) {
         if (handler.pingFlag) {
             console.log("Ping");
             handler.pings = [];
             handler.clients.forEach(cliente => {
                 handler.pings.push(cliente.id);
             });
-            handler.broadcast({ ping : 1});
+            handler.sendAll( { ping : 1} );
             handler.pingFlag = false;
         } else {
             handler.pingFlag = true;
@@ -205,8 +226,8 @@ class Handler extends colyseus.Room {
         }
     }
 
-    pingReceived(cliente) {
-        var i;
+    pingReceived(cliente: Client) {
+        var i: number;
         for (i= 0; i < this.pings.length; i++) {
             if (this.pings[i] === cliente.id) {
                 this.pings.splice(i,1);
@@ -215,11 +236,11 @@ class Handler extends colyseus.Room {
         }
     }
 
-    analisisCola(handler) {
+    analisisCola(handler: Handler) {
         console.log('Analisis cola');
         handler.colaFallos.sort();
-        var id = handler.colaFallos[0];
-        var i , counter = 1;
+        var id: string = handler.colaFallos[0];
+        var i: number , counter = 1;
         for (i = 1 ; i < handler.colaFallos.length; i++) {
             if (handler.colaFallos[i] === id) counter++;
         }
@@ -227,8 +248,7 @@ class Handler extends colyseus.Room {
             var client = handler.getClientConId(id);
             console.log('Se fuerza desconexion de' , id);
             if (client != null) {
-//                client.leave(1000); ==> leave is not a function
-                client.close();
+                client.leave(1000); 
             }
             while(handler.colaFallos[0] === id) {
                 handler.colaFallos.shift();
@@ -239,5 +259,4 @@ class Handler extends colyseus.Room {
         }
     }
 };
-exports.Handler = Handler;
 
