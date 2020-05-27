@@ -66,25 +66,25 @@ canvasClicked(e) {
         if (miclick != null) {
             if (miclick.nombre === this.nombreJugador && miclick.carta != null) { 
                 console.log("Se ha pulsado " + miclick.carta);
-                this.room.send({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
+                enviarMensaje({ action: "EchoCarta" , data: {jugador: this.nombreJugador , carta: miclick.carta.getId() }});
                 this.ui.sounds[0].play();
             }
         } else { // ver si ha pulsado en la zona de cartas para revisar
             var index = this.ui.ganadas.click(e.x, e.y);
             if (index >= 0) {
                 console.log("Se ha pulsado cartas ganadas " + index);
-                this.room.send({ action: "RevisionBaza" , data: this.ui.jugadores[index].nombre});
+                enviarMensaje({ action: "RevisionBaza" , data: this.ui.jugadores[index].nombre});
             }
         }          
     }
 }
 
 cantar() {
-    this.room.send({ action: "Canto" , data: this.nombreJugador});
+    enviarMensaje({ action: "Canto" , data: this.nombreJugador});
 }
 
 cambio7() {
-    this.room.send({ action: "Cambio7" , data: this.nombreJugador});
+    enviarMensaje({ action: "Cambio7" , data: this.nombreJugador});
 }
 
 ordenar(event) {
@@ -117,13 +117,13 @@ mensajeSalir() {
 }
 
 cancelarPartida() {
-    room.send({ action: "PartidaCancelada" , data: nombreJugador});
+    enviarMensaje({ action: "PartidaCancelada" , data: nombreJugador});
     document.getElementById("modalsino").style.display = "none";
     return false;
 }
 
 cartaJugadaRespuesta() {
-    this.room.send({ action: "CartaJugadaOk" , data: nombreJugador});
+    enviarMensaje({ action: "CartaJugadaOk" , data: nombreJugador});
 }
 
 } // fin de clase
