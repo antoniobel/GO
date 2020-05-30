@@ -234,6 +234,13 @@ export class Handler extends Room {
                 break;
             }
         }
+        // #55. Mejora mecanismo ping servidor
+        for (i= 0; i < this.colaFallos.length; i++) {
+            if (this.colaFallos[i] === cliente.id) {
+                this.colaFallos.splice(i,1);
+                break;
+            }
+        }
     }
 
     analisisCola(handler: Handler) {
