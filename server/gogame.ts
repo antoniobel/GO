@@ -470,7 +470,14 @@ export class GoGame {
         var index = this.getJugadorIndex(nombre);
         if (this.indiceGanador < 0) return;
         if (this.indicePareja(index) === this.indicePareja(this.indiceGanador)) {
-            this.triunfo = this.jugadores[index].cambia7(this.triunfo);
+            var carta = this.jugadores[index].cambia7(this.triunfo); // #54. Para evitar mensajes repetidos cambio7
+            if (carta == null) {
+                console.log("Cambio 7 invalido. El jugador no tiene el 7.");
+                return;
+            } else {
+                this.triunfo = carta;
+            }
+//            this.triunfo = this.jugadores[index].cambia7(this.triunfo);
             var carta = this.baraja.cartas.pop(); // Quitamos la última carta, que marca el triunfo
             this.baraja.cartas.push(this.triunfo); // añadimos la carta cambiada (el 7) en la última posición.
             this.enviarEvento('' , { action: "HaCambiado7", data: {jugador: nombre , carta: carta.id}});
