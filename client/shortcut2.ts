@@ -1,12 +1,7 @@
-/**
- * http://www.openjs.com/scripts/events/keyboard_shortcuts/
- * Version : 2.01.B
- * By Binny V A
- * License : BSD
- */
-shortcut = {
-	'all_shortcuts':{},//All the shortcuts are stored in this array
-	'add': function(shortcut_combination,callback,opt) {
+export class shortcut {
+    all_shortcuts ={} ; //All the shortcuts are stored in this array
+    
+	add(shortcut_combination,callback,opt) {
 		//Provide a set of default options
 		var default_options = {
 			'type':'keydown',
@@ -40,7 +35,8 @@ shortcut = {
 				if(element.tagName == 'INPUT' || element.tagName == 'TEXTAREA') return;
 			}
 	
-			//Find Which key is pressed
+            //Find Which key is pressed
+            var code;
 			if (e.keyCode) code = e.keyCode;
 			else if (e.which) code = e.which;
 			var character = String.fromCharCode(code).toLowerCase();
@@ -140,7 +136,8 @@ shortcut = {
 			if(e.shiftKey)	modifiers.shift.pressed = true;
 			if(e.altKey)	modifiers.alt.pressed = true;
 			if(e.metaKey)   modifiers.meta.pressed = true;
-                        
+             
+            var k;
 			for(var i=0; k=keys[i],i<keys.length; i++) {
 				//Modifiers
 				if(k == 'ctrl' || k == 'control') {
@@ -204,10 +201,10 @@ shortcut = {
 		if(ele.addEventListener) ele.addEventListener(opt['type'], func, false);
 		else if(ele.attachEvent) ele.attachEvent('on'+opt['type'], func);
 		else ele['on'+opt['type']] = func;
-	},
+	};
 
 	//Remove the shortcut - just specify the shortcut and I will remove the binding
-	'remove':function(shortcut_combination) {
+	remove( shortcut_combination) {
 		shortcut_combination = shortcut_combination.toLowerCase();
 		var binding = this.all_shortcuts[shortcut_combination];
 		delete(this.all_shortcuts[shortcut_combination])

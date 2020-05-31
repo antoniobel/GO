@@ -10,17 +10,17 @@ Copyright (C) 2020 Antonio Bel Puchol
         <link rel="stylesheet" type="text/css" href="css/estilo.css">
         <link rel="icon" href="client/img/favicon32.png" type="image/png" />
         <!-- Módulos javascript -->
-        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
+<!--        <script type="text/javascript" src="colyseusclient/colyseus.js"></script>
         <script type="text/javascript" src="client/gobase.js"></script>
-        <script type="text/javascript" src="client/goGraficos.js"></script>
-        <script type="text/javascript" src="client/shortcut.js"></script>
+        <script type="text/javascript" src="client/goGraficos.js"></script> 
+        <script type="text/javascript" src="client/shortcut.js"></script> -->
     </head>
     <body>
         <!-- Ventana emergente -->
         <div id="myModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <span id="close1" class="close" onclick="close1()">&times;</span>
+                    <span id="close1" class="close">&times;</span>
                     <h2>
                         <img src="client/img/favicon64.png" alt="Guiñote Olympic" style="float:left;width:32px;height:32px;">
                         &emsp;Bienvenido a Guiñote Olympic
@@ -29,24 +29,24 @@ Copyright (C) 2020 Antonio Bel Puchol
                 <div class="modal-body">
                     <p><label>Nombre:</label>
                         <input type="text" id="name" name="name">
-                        <button id=conectar class="button  button1" onclick="conectar()">Conectar</button>
-                        <button id=desconectar class="button  button1" onclick="desconectar()">Desconectar</button>
+                        <button id=conectar class="button  button1" >Conectar</button>
+                        <button id=desconectar class="button  button1">Desconectar</button>
                     </p>
                     <div class="column left" style="background-color:#ddd;">
                         <label>Jugadores:</label><br>
-                        <select id="usuarios" onclick="incluir()" size="8"></select>
+                        <select id="usuarios" size="8"></select>
                     </div>
                     <div class="column right" style="background-color:#ddd;">
                         <label>Pareja 1:</label><br>
-                        <select id="pareja1" onclick="excluir('pareja1')" size="2"></select><br>
+                        <select id="pareja1" size="2"></select><br>
                         <label>Pareja 2:</label><br>
-                        <select id="pareja2" onclick="excluir('pareja2')" size="2"></select><br>
+                        <select id="pareja2" size="2"></select><br>
                         <div class="explain">
                             Selecciona jugadores para formar las parejas. Los jugadores no seleccionados entrarán en la partida como espectadores.
                         </div>              
                     </div>
                     <div class="centrar">
-                        <button id=comenzar class="button  button1" onclick="comenzar()" disabled>Comenzar partida</button>
+                        <button id=comenzar class="button  button1" disabled>Comenzar partida</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -63,7 +63,7 @@ Copyright (C) 2020 Antonio Bel Puchol
         <div id="modalfin" class="modal" >
             <div class="modal-content" style="width: 30%">
                 <div class="modal-header">
-                    <span id="close2" class="close" onclick="close2()">&times;</span>
+                    <span id="close2" class="close">&times;</span>
                     <h2>Resultados de la partida</h2>
                 </div>
                 <div class="modal-body">
@@ -98,15 +98,16 @@ Copyright (C) 2020 Antonio Bel Puchol
         </div>
         <!-- Canvas y botones del juego (superpuestos en el canvas) -->
         <p id="puntos" class="puntos"></p>
-        <button id="cante" class="button  button1" onclick="cantar()" disabled>Cantar   </button>
-        <button id="cambio7" class="button  button1" onclick="cambio7()" disabled>Cambiar 7</button>
-        <button id="ordenar" class="button  button1" onclick="ordenar(event)" disabled>Ordenar</button>
-        <button id="salir" class="button  button1" onclick="salir()">Salir   </button>
+        <button id="cante" class="button  button1" disabled>Cantar   </button>
+        <button id="cambio7" class="button  button1" disabled>Cambiar 7</button>
+        <button id="ordenar" class="button  button1" disabled>Ordenar</button>
+        <button id="salir" class="button  button1" >Salir   </button>
         <canvas id="canvas" width="600px" height="300px"></canvas>
-        <script type="text/javascript" src="client/goComun.js"></script>        
+<!--        <script type="text/javascript" src="client/goComun.js"></script>        
         <script type="text/javascript" src="client/goJugador.js"></script>        
         <script type="text/javascript" src="client/goPublico.js"></script>        
-        <script type="text/javascript" src="client/goMain.js"></script>        
+        <script type="text/javascript" src="client/dist/goMain.js"></script>  --> 
+        <script type="text/javascript" src="client/dist/bundle.js"></script>      
 
     </body>
 </html>

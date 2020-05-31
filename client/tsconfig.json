@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist", 
+        "module": "ES6",
+        "lib": ["ES6", "DOM", "ES5" ],
+        "target": "ES5",
+        "declaration": false,
+        "noImplicitAny": false,
+        "sourceMap": false,
+        "esModuleInterop": false
+    },
+    "include": [
+      "**/*.ts"
+    ]
+}

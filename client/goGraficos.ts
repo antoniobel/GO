@@ -3,19 +3,31 @@
  */
 "use strict";
 
+import { Carta } from "./carta";
+import { main, ui } from "./goMain";
+
 /**
  * Objeto que tiene las imágenes de todas las cartas
  */
-class GBaraja {
+export class GBaraja {
+    private leidas: number;
+    private imagenes: Array<HTMLImageElement>;
+    public reverso: HTMLImageElement;
+    public palos: Array<HTMLImageElement>;
+    public paloReverso: HTMLImageElement;
+    public cuarenta: HTMLImageElement;
+    public veinte: HTMLImageElement;
+    public cantes: Array<HTMLImageElement>;
+    private sietes: Array<HTMLImageElement>;
+
     constructor() {
         this.leerCartas();
     }
     
-    leerCartas() {
+    private leerCartas(): void {
         this.leidas = 0;
         this.imagenes = [];
-        var i;
-        for (i = 0 ; i < 40 ; i++) {
+        for (var i = 0 ; i < 40 ; i++) {
             this.imagenes[i] = new Image();
             this.imagenes[i].addEventListener('load', () => {
                 this.leidas++;
@@ -46,20 +58,23 @@ class GBaraja {
         }
     } 
 
-    ancho() {
+    public ancho(): number {
         return 123;
     }
 
-    alto() {
+    public alto(): number {
         return 190;
     }
 
-    get(i) {
+    public imagen(i: number): HTMLImageElement {
         return this.imagenes[i];
     }
 }
 
-class MiCanvas {
+export class MiCanvas {
+    private fondo: HTMLImageElement;
+    private escalarFondo: boolean;
+    private scale: number;
 
     constructor() {
         this.fondo = new Image();
@@ -72,15 +87,15 @@ class MiCanvas {
        }, false);    
     }
 
-    fullScreen() {
+    public fullScreen(): void {
         this.canvas().height = window.innerHeight - 20;
         this.canvas().width = window.innerWidth - 20;
         this.fijarEscala();
         this.ponerFondo();
     }
 
-    ponerFondo() {
-        var context = document.getElementById("canvas").getContext("2d");
+    public ponerFondo(): void {
+        var context = (<HTMLCanvasElement>document.getElementById("canvas")).getContext("2d");
         this.context().setTransform(1, 0, 0, 1, 0, 0);
         if (this.escalarFondo) {
             context.drawImage(this.fondo, 0, 0, this.canvas().width , this.canvas().height);
@@ -90,7 +105,7 @@ class MiCanvas {
         this.context().scale(this.scale , this.scale);
     }
 
-    fijarEscala() {
+    private fijarEscala(): void {
         var ratio = 5.5; // número de cartas enteras que quiero que quepan
         var alto = window.innerHeight - 20;
         var ancho = window.innerWidth - 20;
@@ -107,37 +122,42 @@ class MiCanvas {
         }
     }
 
-    ancho() {
+    public ancho(): number {
         return (window.innerWidth - 20) / this.escala();
     }
 
-    alto() {
+    public alto(): number {
         return (window.innerHeight - 20) / this.escala();
     }
 
-    escala() {
+    public escala(): number {
         return this.scale;
     }
 
-    canvas() {
-        return document.getElementById("canvas");
+    public canvas(): HTMLCanvasElement {
+        return <HTMLCanvasElement>document.getElementById("canvas");
     }
 
-    context() {
-        var canvas = document.getElementById("canvas");
+    public context(): CanvasRenderingContext2D {
+        var canvas =  <HTMLCanvasElement>document.getElementById("canvas");
         return canvas.getContext("2d");
     }
 }
 
-class Zona {
-    constructor(startX , startY , endX, endY) {
+export class Zona {
+    readonly startx: number;
+    readonly starty: number;
+    readonly endx: number;
+    readonly endy: number;
+
+    constructor(startX:number , startY:number  , endX: number , endY: number) {
         this.startx = startX;
         this.starty = startY;
         this.endx = endX;
         this.endy = endY;
     } 
 
-    estaDentro(x , y) {
+    public estaDentro(x:number , y:number): boolean {
         if (x >= this.startx && x <= this.endx) {
             if (y >= this.starty && y <= this.endy) {
                 return true;
@@ -147,20 +167,30 @@ class Zona {
     }
 }
 
-class GJugador {
-    /* Variables
-    * this.cartas [] - Array de cartas
-    * this.nombre - Nombre del jugador  
-    * this.posicion - Posición del jugador en la pantalla. 4 posibilidades: arriba, abajo, derecha e izquierda. 
-    *                 Al asignar la posición se calculan las posiciones de las cartas.
-    * this.visible - true (se ven las cartas por su lado bueno) or false (solo se ve el reverso).
-    * this.margen - Margen del borde de la pantalla que toque hasta las cartas.
-    * this.intervalo - Distancia entre el borde de una carta y la siguiente. Puede ser negativo, y entonces las cartas se solapan
-    * this.turno - true si el jugador tiene el turno
-    * this.zonas [] - Array de zonas (rectangulos) que son las posiciones fisicas ocupadas por las cartas (para el click)
-    */
-    constructor(ui, nombre, posicion) {
-        this.ui = ui;
+export class GJugador {
+    readonly nombre: string; // Nombre del jugador
+    readonly posicion: string; // Posición del jugador en la pantalla. 4 posibilidades: arriba, abajo, derecha e izquierda.
+    public cartas: Array<Carta>; // Array de cartas del jugador
+    public zonas: Array<Zona>; // Array de zonas (rectangulos) que son las posiciones fisicas ocupadas por las cartas (para el click)
+    private margen: number; //Margen del borde de la pantalla que toque hasta las cartas.
+    public visible: boolean; // true si las cartas son visibles (están boca arriba) o no (boca abajo)
+    public turno: boolean; // true si el jugador tiene el turno de juego
+    public paloCantes: Array<number>; // Array que indica para cada palo si se ha cantado o no
+    private startx: number; // Posición x de inicio para dibujar las cartas
+    private starty: number; // Posición y de inicio para dibujar las cartas
+    private giro: boolean; // true si hay que girar las cartas (posiciones izquierda y derecha)
+    private intervalo: number; // Distancia entre el borde de una carta y la siguiente. Puede ser negativo, y entonces las cartas se solapan
+    public zonaGlobal: Zona; // Rectángulo formado por todas las cartas juntas (es el area de click para los espectadores)
+    private nombrex: number; // Posición x de inicio para dibujar el nombre del jugador
+    private nombrey: number; // Posición y de inicio para dibujar el nombre del jugador
+    private cantex: number; // Posición x de inicio para dibujar el marcador de cantes
+    private cantey: number; // Posición y de inicio para dibujar el marcador de cantes
+    public luzx: number; // Posición x de inicio para dibujar la luz de turno
+    public luzy: number; // Posición y de inicio para dibujar la luz de turno
+    private longNombre: number; // Longitud (en pixels) del nombre del jugador. Se usa para la posición arriba
+    public luzVerde: boolean; // true si la luz tiene que estar verde
+
+    constructor(nombre: string, posicion: string) {
         this.nombre = nombre;
         this.posicion = posicion;
         this.cartas = [];
@@ -169,37 +199,35 @@ class GJugador {
         this.visible = false;
         this.turno = false;
         this.paloCantes = [];
-        this.intervalId = 0;
         this.calcularLongNombre();
     }
 
-    init() {
+    public init(): void {
         this.cartas = [];
         this.paloCantes = [];
-//        this.quitarTurno();
         this.turno = false;
     }
 
-    dibujar() {        
-        var context = this.ui.canvas.context();
+    public dibujar(): void {        
+        var context = ui.canvas.context();
         // calculamos posiciones
         this.calcularPosiciones();
         // Dibujamos cartas
         this.zonas = [];
         this.cartas.forEach(carta => {
-            this.zonas.push(new Zona(this.startx, this.starty , this.startx + this.ui.baraja.ancho() , this.starty + this.ui.baraja.alto()));
+            this.zonas.push(new Zona(this.startx, this.starty , this.startx + ui.baraja.ancho() , this.starty + ui.baraja.alto()));
             if (!this.giro) {
                 this.ponerImagen(carta , this.startx , this.starty);
-                this.startx += this.ui.baraja.ancho() + this.intervalo;
+                this.startx += ui.baraja.ancho() + this.intervalo;
             } else {
-                var cx = this.startx  + this.ui.baraja.alto()/2;
-                var cy = this.starty + this.ui.baraja.ancho()/2;
+                var cx = this.startx  + ui.baraja.alto()/2;
+                var cy = this.starty + ui.baraja.ancho()/2;
                 // Hay que trasladarse al centro de la figura que se quiere girar, establecer la rotación y volver al origen
                 context.translate(cx , cy);
                 context.rotate((Math.PI / 180) * 90);
                 context.translate(-cx , - cy);
                 this.ponerImagen(carta , this.startx , this.starty);
-                this.starty += this.ui.baraja.ancho() + this.intervalo;
+                this.starty += ui.baraja.ancho() + this.intervalo;
                 // después de dibujar hay que volver al punto central, deshacer el giro, y volver al origen
                 context.translate(cx , cy);
                 context.rotate(-(Math.PI / 180) * 90);
@@ -216,96 +244,117 @@ class GJugador {
         });
         this.zonaGlobal = new Zona(minx, miny, maxx, maxy);
         // Ponemos el nombre
-        drawTextBG(context, this.nombre, "30px Arial", this.nombrex, this.nombrey);
+        this.drawTextBG(context, this.nombre, "30px Arial", this.nombrex, this.nombrey);
         // Ponemos luz de turno
         this.ponerLuz();
         // Ponemos los cantes
-        var i;
-        var escala = this.ui.canvas.escala();
         this.paloCantes.forEach(cante =>{
             if (cante === -1) {
-                context.drawImage(this.ui.baraja.paloReverso, this.cantex , this.cantey , 32 , 32);
+                context.drawImage(ui.baraja.paloReverso, this.cantex , this.cantey , 32 , 32);
             } else {
-                context.drawImage(this.ui.baraja.palos[cante], this.cantex , this.cantey , 32 , 32);
+                context.drawImage(ui.baraja.palos[cante], this.cantex , this.cantey , 32 , 32);
             }
-            this.cantex += 36;
+            if (this.posicion === 'arriba') {
+                this.cantex -= 36;
+            } else {
+                this.cantex += 36;
+            }
         });
     }
 
-    calcularPosiciones() {
-        var ancho , alto;
+    /**
+     * Escribe un texto sobre el canvas 
+     */
+    private drawTextBG(ctx: CanvasRenderingContext2D, txt: string, font: string, x: number, y: number): void {
+        /// lets save current state as we make a lot of changes        
+        ctx.save();
+        /// set font
+        ctx.font = font;
+        /// draw text from top - makes life easier at the moment
+        ctx.textBaseline = 'top';
+        // Letras en blanco.
+        ctx.fillStyle = '#ffffff';
+        /// draw text on top
+        ctx.fillText(txt, x, y);
+        /// restore original state
+        ctx.restore();
+    }
+
+    private calcularPosiciones(): void {
+        var ancho: number , alto: number;
         switch (this.posicion) {
             case 'abajo':
                 this.intervalo = 10;
-                ancho = this.ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
-                this.startx = (this.ui.canvas.ancho() - ancho) / 2;
-                this.starty = this.ui.canvas.alto() - this.ui.baraja.alto() - this.margen;
+                ancho = ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
+                this.startx = (ui.canvas.ancho() - ancho) / 2;
+                this.starty = ui.canvas.alto() - ui.baraja.alto() - this.margen;
                 this.giro = false;
                 // Nombre
-                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
-                this.nombrey = this.ui.canvas.alto() - 50 ;
+                this.nombrex = (ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
+                this.nombrey = ui.canvas.alto() - 50 ;
                 // luz de turno
-                this.luzx = (this.ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
-                this.luzy = this.ui.canvas.alto() - 85 ;
+                this.luzx = (ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
+                this.luzy = ui.canvas.alto() - 85 ;
                 // cantes
-                this.cantex = (this.ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
-                this.cantey = this.ui.canvas.alto() - 115 ;
+                this.cantex = (ui.canvas.ancho() - ancho ) / 2 + ancho + this.margen;
+                this.cantey = ui.canvas.alto() - 115 ;
                 break;
             case 'arriba':
                 this.intervalo = 10;
-                ancho = this.ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
-                this.startx = (this.ui.canvas.ancho() - ancho) / 2;
+                ancho = ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
+                this.startx = (ui.canvas.ancho() - ancho) / 2;
                 this.starty = this.margen;
                 this.giro = false;
                 // nombre
 //                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
-                this.nombrex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - this.longNombre - 35;
+                this.nombrex = (ui.canvas.ancho() - ancho ) / 2 + this.margen - this.longNombre - 35;
                 this.nombrey = 50 ;
                 // luz de turno
 //                this.luzx = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
                 this.luzx = this.nombrex;
                 this.luzy = 85 ;
                 // cantes
-                this.cantex = (this.ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
+                this.cantex = (ui.canvas.ancho() - ancho ) / 2 + this.margen - this.longNombre - 35;
+//                this.cantex = (ui.canvas.ancho() - ancho ) / 2 + this.margen - 200;
                 this.cantey = 115 ;
                 break;
             case 'izquierda':
                 this.intervalo = -30;
-                alto = this.ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
-                this.startx = this.margen + (this.ui.baraja.alto() - this.ui.baraja.ancho()) / 2;
-                this.starty = (this.ui.canvas.alto() - alto) / 2;
+                alto = ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
+                this.startx = this.margen + (ui.baraja.alto() - ui.baraja.ancho()) / 2;
+                this.starty = (ui.canvas.alto() - alto) / 2;
                 this.giro = true;
                 // nombre
                 this.nombrex = 10;
-                this.nombrey = (this.ui.canvas.alto() - alto ) / 2 + alto;
+                this.nombrey = (ui.canvas.alto() - alto ) / 2 + alto;
                 // luz de turno
                 this.luzx = 10;
-                this.luzy = (this.ui.canvas.alto() - alto ) / 2 + alto + 35;
+                this.luzy = (ui.canvas.alto() - alto ) / 2 + alto + 35;
                 // cantes
                 this.cantex = 10;
-                this.cantey = (this.ui.canvas.alto() - alto ) / 2 + alto + 65;
+                this.cantey = (ui.canvas.alto() - alto ) / 2 + alto + 65;
                 break;
            case 'derecha':
                 this.intervalo = -30;
-                alto = this.ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
-                this.startx = this.ui.canvas.ancho() - this.margen - this.ui.baraja.alto() + (this.ui.baraja.alto() - this.ui.baraja.ancho()) / 2;
-                this.starty = (this.ui.canvas.alto() - alto) / 2;
+                alto = ui.baraja.ancho() * this.cartas.length + this.intervalo * (this.cartas.length - 1);
+                this.startx = ui.canvas.ancho() - this.margen - ui.baraja.alto() + (ui.baraja.alto() - ui.baraja.ancho()) / 2;
+                this.starty = (ui.canvas.alto() - alto) / 2;
                 this.giro = true;
                 // nombre
-                this.nombrex = this.ui.canvas.ancho() - 200;
-                this.nombrey = (this.ui.canvas.alto() - alto ) / 2 - this.ui.baraja.ancho()/2 - this.margen;
+                this.nombrex = ui.canvas.ancho() - 200;
+                this.nombrey = (ui.canvas.alto() - alto ) / 2 - ui.baraja.ancho()/2 - this.margen;
                 // luz de turno
-                this.luzx = this.ui.canvas.ancho() - 200;
-                this.luzy = (this.ui.canvas.alto() - alto ) / 2 - this.ui.baraja.ancho()/2 - this.margen - 35;
+                this.luzx = ui.canvas.ancho() - 200;
+                this.luzy = (ui.canvas.alto() - alto ) / 2 - ui.baraja.ancho()/2 - this.margen - 35;
                 // cantes
-                this.cantex = this.ui.canvas.ancho() - 200;
-                this.cantey = (this.ui.canvas.alto() - alto ) / 2 - this.ui.baraja.ancho()/2 - this.margen - 65;
+                this.cantex = ui.canvas.ancho() - 200;
+                this.cantey = (ui.canvas.alto() - alto ) / 2 - ui.baraja.ancho()/2 - this.margen - 65;
                 break;    
         }
     }
 
-    calcularLongNombre() {
-        var context = this.ui.canvas.context();
+    private calcularLongNombre(): void {
+        var context = ui.canvas.context();
         context.save();
         context.font = "30px Arial";
         this.longNombre = context.measureText(this.nombre).width;
@@ -313,62 +362,49 @@ class GJugador {
         console.log("Longitud nombre: " , this.longNombre);
     }
 
-    ponerImagen(carta , x , y) {
-        var context = this.ui.canvas.context();
+    private ponerImagen(carta: Carta , x: number , y: number): void {
+        var context = ui.canvas.context();
         if (this.visible) {
-            context.drawImage(this.ui.baraja.imagenes[carta.id], x , y);
+            context.drawImage(ui.baraja.imagen(carta.id), x , y);
         } else {
-            context.drawImage(this.ui.baraja.reverso, x , y);
+            context.drawImage(ui.baraja.reverso, x , y);
         }
     }
 
-    ponerLuz() {
-        var context = this.ui.canvas.context();
+    private ponerLuz(): void {
+        var context = ui.canvas.context();
         if (this.turno) {
-            context.drawImage(this.ui.verde, this.luzx , this.luzy);
+            context.drawImage(ui.verde, this.luzx , this.luzy);
         } else {
-            context.drawImage(this.ui.roja, this.luzx , this.luzy);
+            context.drawImage(ui.roja, this.luzx , this.luzy);
         }
 
     }
 
-    cambia7(carta){
-        var i;
-        for (i = 0; i < this.cartas.length; i++) {
-            if (this.cartas[i].valor === 6 && this.cartas[i].palo === carta.palo) {
-                var c = this.cartas[i];
-                this.cartas.splice(i,1);
-                this.cartas.push(carta);
-                return c;
-            } 
-        }
-        return null;
-    }
-
-    ordenar() {
+    public ordenar(): void {
         this.cartas.sort((a,b) => {
             return a.id - b.id;
         });
     }
 
-    posicionarCante(indice) {
-        var x ,y;
+    public posicionarCante(indice: number): any {
+        var x: number , y: number;
         switch (this.posicion) {
             case 'abajo':
-                x = Math.floor(this.ui.canvas.ancho() * this.ui.canvas.escala() / 2  - 117 - 60 + 120* (indice -1));
-                y = Math.floor(this.ui.canvas.alto() * this.ui.canvas.escala() - 245);
+                x = Math.floor(ui.canvas.ancho() * ui.canvas.escala() / 2  - 117 - 60 + 120* (indice -1));
+                y = Math.floor(ui.canvas.alto() * ui.canvas.escala() - 245);
                 break;
             case 'arriba':
-                x = Math.floor(this.ui.canvas.ancho() * this.ui.canvas.escala() / 2 - 117 - 60 + 120* (indice -1));
+                x = Math.floor(ui.canvas.ancho() * ui.canvas.escala() / 2 - 117 - 60 + 120* (indice -1));
                 y = 20;
                 break;
             case 'derecha':
-                x = Math.floor(this.ui.canvas.ancho() * this.ui.canvas.escala() - 254);
-                y = Math.floor(this.ui.canvas.alto() * this.ui.canvas.escala()  / 2 - 112 - 75 + 150* (indice -1));
+                x = Math.floor(ui.canvas.ancho() * ui.canvas.escala() - 254);
+                y = Math.floor(ui.canvas.alto() * ui.canvas.escala()  / 2 - 112 - 75 + 150* (indice -1));
                 break;
             case 'izquierda':
                 x = 20;
-                y = Math.floor(this.ui.canvas.alto() * this.ui.canvas.escala() / 2 - 117 - 75 + 150* (indice -1));
+                y = Math.floor(ui.canvas.alto() * ui.canvas.escala() / 2 - 117 - 75 + 150* (indice -1));
                 break;
         }
         return { x: x , y: y};
@@ -378,26 +414,26 @@ class GJugador {
      * Punto de salida o llegada para las animaciones. Index es el índice de la carta que sale o llega. Si llega
      * hacer que sea = cartas.length. Si sale puede ser cualquiera
      */
-    puntoMueve(index) {
+    public puntoMueve(index: number): any {
         this.calcularPosiciones();
-        var x , y ;
+        var x: number , y: number ;
         switch (this.posicion) {
             case 'abajo':
             case 'arriba':
-                x = this.startx + (this.ui.baraja.ancho() + this.intervalo) * index;
+                x = this.startx + (ui.baraja.ancho() + this.intervalo) * index;
                 y = this.starty;
                 break;
             case 'derecha':
             case 'izquierda':
                 x = this.startx;
-                y =this.starty + (this.ui.baraja.ancho() + this.intervalo) * index;
+                y =this.starty + (ui.baraja.ancho() + this.intervalo) * index;
                 break;
         }
         return { x: x , y: y};
     }
 
-    quitarCarta(carta) {
-        var i;
+    public quitarCarta(carta: Carta): void {
+        var i: number;
         for (i = 0; i < this.cartas.length; i++) {
             if (this.cartas[i].id === carta.id) {
                 this.cartas.splice(i,1);
@@ -406,8 +442,8 @@ class GJugador {
         }
     }
 
-    ponerCarta(carta) {
-        var i;
+    public ponerCarta(carta: Carta): void {
+        var i: number;
         for (i = 0; i < this.cartas.length; i++) {
             if (this.cartas[i].id === carta.id) {
                 return;
@@ -417,181 +453,187 @@ class GJugador {
     }
 }
 
-class GBaza {
-    constructor(ui) {
-        this.ui = ui;
+export class GBaza {
+    public cartas: Array<Carta>; // Array de cartas con la baza actual, en el orden en que se han echado.
+    public nombres: Array<string>; // Array de nombres de los jugadores, en el orden en que han jugado.
+    public ganador: string; // ganador de la baza.
+    private margen: number; 
+
+    constructor() {
         this.init();
     }
 
-    init() {
+    public init(): void {
         this.cartas = [];
         this.nombres = [];
         this.ganador = '';
     }
 
-    dibujar() {
-        var context = this.ui.canvas.context();
+    public dibujar(): void {
+        var context = ui.canvas.context();
         this.margen = 10;
-        var i;
-        for (i = 0; i < this.cartas.length; i++) {
-            var posicion = this.ui.posicion(this.nombres[i]);
-            var x , y;
+        for (var i = 0; i < this.cartas.length; i++) {
+            var posicion = ui.posicion(this.nombres[i]);
+            var x: number , y: number;
             switch (posicion) {
                 case "abajo":
-                    x = (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2;
-                    y = this.ui.canvas.alto() - 2 * (this.ui.baraja.alto() + this.margen);
+                    x = (ui.canvas.ancho() - ui.baraja.ancho()) / 2;
+                    y = ui.canvas.alto() - 2 * (ui.baraja.alto() + this.margen);
                     break;
                 case "arriba":
-                    x = (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2;
-                    y = this.ui.baraja.alto() + (2 * this.margen);
+                    x = (ui.canvas.ancho() - ui.baraja.ancho()) / 2;
+                    y = ui.baraja.alto() + (2 * this.margen);
                     break;
                 case "derecha":
-                    x = this.ui.canvas.ancho() - (2 * this.margen) - this.ui.baraja.alto() - this.ui.baraja.ancho();
-                    y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+                    x = ui.canvas.ancho() - (2 * this.margen) - ui.baraja.alto() - ui.baraja.ancho();
+                    y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
                     break;
                 case "izquierda":
-                    x = this.ui.baraja.alto() + (2 * this.margen);
-                    y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+                    x = ui.baraja.alto() + (2 * this.margen);
+                    y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
                     break;
             }
             if (this.ganador === '') { 
-                context.drawImage(this.ui.baraja.imagenes[this.cartas[i].id], x , y);
+                context.drawImage(ui.baraja.imagen(this.cartas[i].id), x , y);
             } else {
                 if (this.nombres[i] === this.ganador) {
-                    context.drawImage(this.ui.baraja.imagenes[this.cartas[i].id], x , y);
+                    context.drawImage(ui.baraja.imagen(this.cartas[i].id), x , y);
                 } else {
-                    context.drawImage(this.ui.baraja.reverso, x , y);
+                    context.drawImage(ui.baraja.reverso, x , y);
                 }
             }
         }
     } 
 
-    puntoMueve(nombre) {
-        var x , y;
-        var posicion = this.ui.posicion(nombre);
+    public puntoMueve(nombre: string): any {
+        var x: number , y: number;
+        var posicion = ui.posicion(nombre);
         switch (posicion) {
             case "abajo":
-                x = (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2;
-                y = this.ui.canvas.alto() - 2 * (this.ui.baraja.alto() + this.margen);
+                x = (ui.canvas.ancho() - ui.baraja.ancho()) / 2;
+                y = ui.canvas.alto() - 2 * (ui.baraja.alto() + this.margen);
                 break;
             case "arriba":
-                x = (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2;
-                y = this.ui.baraja.alto() + (2 * this.margen);
+                x = (ui.canvas.ancho() - ui.baraja.ancho()) / 2;
+                y = ui.baraja.alto() + (2 * this.margen);
                 break;
             case "derecha":
-                x = this.ui.canvas.ancho() - (2 * this.margen) - this.ui.baraja.alto() - this.ui.baraja.ancho();
-                y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+                x = ui.canvas.ancho() - (2 * this.margen) - ui.baraja.alto() - ui.baraja.ancho();
+                y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
                 break;
             case "izquierda":
-                x = this.ui.baraja.alto() + (2 * this.margen);
-                y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+                x = ui.baraja.alto() + (2 * this.margen);
+                y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
                 break;
         }
         return { x: x, y: y};
     }
 }
 
-class GMazo {
-    constructor(ui) {
-        this.ui = ui;
+export class GMazo {
+    public numCartas: number;
+    public triunfo: any;
+
+    constructor() {
         this.init();
     }
 
-    init() {
+    public init(): void {
         this.numCartas = 0; // el número de cartas que hay en el mazo (incluyendo la carta de triunfo)
         this.triunfo = 0; // carta que marca triunfo. alguien la tendrá que poner
     }
 
-    dibujar() {
-        var x , y;
-        var context = this.ui.canvas.context();
+    public dibujar(): void {
+        var x: number , y: number;
+        var context = ui.canvas.context();
         if (this.numCartas === 0 && this.triunfo != 0) {
-            x = this.ui.canvas.ancho() / 2 - 32;
-            y = this.ui.canvas.alto() / 2 - 32;
-            context.drawImage(this.ui.baraja.palos[this.triunfo.palo] , x , y , 64 , 64);
+            x = ui.canvas.ancho() / 2 - 32;
+            y = ui.canvas.alto() / 2 - 32;
+            context.drawImage(ui.baraja.palos[this.triunfo.palo] , x , y , 64 , 64);
             return;
         }        
-        x = (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2 ;
-        y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+        x = (ui.canvas.ancho() - ui.baraja.ancho()) / 2 ;
+        y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
         // Dibujamos carta de triunfo
         if (this.triunfo != 0) {
-            var cx = x + this.ui.baraja.ancho()/2;
-            var cy = y + this.ui.baraja.alto()/2;
+            var cx = x + ui.baraja.ancho()/2;
+            var cy = y + ui.baraja.alto()/2;
             // Hay que trasladarse al centro de la figura que se quiere girar, establecer la rotación y volver al origen
             context.translate(cx , cy);
             context.rotate((Math.PI / 180) * 90);
             context.translate(-cx , - cy);
-            context.drawImage(this.ui.baraja.imagenes[this.triunfo.id] , x , y);
+            context.drawImage(ui.baraja.imagen(this.triunfo.id) , x , y);
             context.translate(cx , cy);
             context.rotate(-(Math.PI / 180) * 90);
             context.translate(-cx , - cy);
         }
         // Dibujamos las cartas del mazo. Boca abajo, tantas como this.numCartas hay, menos 1 (el triunfo)
         // Vamos desplazando un poquito las cartas para que se vea mazo. (mola!)
-        var i;
-        x -= this.ui.baraja.ancho() / 2 ;
-        for (i = 0 ; i < this.numCartas-1; i++) {
-            context.drawImage(this.ui.baraja.reverso, x+i , y);
+        x -= ui.baraja.ancho() / 2 ;
+        for (var i = 0 ; i < this.numCartas-1; i++) {
+            context.drawImage(ui.baraja.reverso, x+i , y);
         }
     }
 
     /**
      * Devuelve la posicion de inicio para el movimiento de la carta
      */
-    puntoMueve() {
-        var x =  (this.ui.canvas.ancho() - this.ui.baraja.ancho()) / 2 ;
-        var y = (this.ui.canvas.alto() - this.ui.baraja.alto()) / 2;
+    public puntoMueve(): any {
+        var x =  (ui.canvas.ancho() - ui.baraja.ancho()) / 2 ;
+        var y = (ui.canvas.alto() - ui.baraja.alto()) / 2;
         return { x: x, y: y};
     }
 }
 
-class GGanadas {
-    constructor(ui) {
-        this.ui = ui;
+export class GGanadas {
+    public parejas: Array<Array<string>>; // Nombres de los jugadores que forman las parejas. elem. 0  pareja 1, elem. 1 pareja 2
+    private ganadas: Array<number>; // Número de cartas ganadas por cada pareja
+    private giros: Array<number>; // Array de giros (angulos de giro) de cada carta en el montón.
+    private zonas: Array<Zona>; // Zona para hacer click en el montón.
+
+    constructor() {
         this.parejas = [];
         this.init();
     }
 
-    init() {
+    public init() {
         this.ganadas = []; 
         this.ganadas.push(0);
         this.ganadas.push(0);
         this.giros = [];
         this.zonas = [];
         var punto = this.obtenerPunto(0);
-        this.zonas[0] = new Zona(punto.x, punto.y , punto.x + this.ui.baraja.alto() , punto.y + this.ui.baraja.alto());
+        this.zonas[0] = new Zona(punto.x, punto.y , punto.x + ui.baraja.alto() , punto.y + ui.baraja.alto());
         punto = this.obtenerPunto(1);
-        this.zonas[1] = new Zona(punto.x, punto.y , punto.x + this.ui.baraja.alto() , punto.y + this.ui.baraja.alto());
+        this.zonas[1] = new Zona(punto.x, punto.y , punto.x + ui.baraja.alto() , punto.y + ui.baraja.alto());
     }
 
-    dibujar() {
-        var context = this.ui.canvas.context();
-        var i = 0;
+    public dibujar(): void {
         var punto = this.obtenerPunto(0);
         this.dibujarCartas(0, punto.x , punto.y);
         punto = this.obtenerPunto(1);
         this.dibujarCartas(1, punto.x , punto.y);
     }
 
-    obtenerPunto(indice) {
-        var x , y;
+    public obtenerPunto(indice: number): any {
+        var x: number , y: number;
         if (indice === 0) {
-            x = this.ui.baraja.alto() * 1.5;
-            y = this.ui.canvas.alto() - this.ui.baraja.alto() * 1.5;
+            x = ui.baraja.alto() * 1.5;
+            y = ui.canvas.alto() - ui.baraja.alto() * 1.5;
             return {x: x , y: y};
         }
         if (indice === 1) {
-            x = this.ui.canvas.ancho() - this.ui.baraja.alto() * 2.2;
-            y = this.ui.baraja.alto() * 0.5;
+            x = ui.canvas.ancho() - ui.baraja.alto() * 2.2;
+            y = ui.baraja.alto() * 0.5;
             return {x: x , y: y};
         }
     }
 
-    dibujarCartas(index, x , y) {
-        var i;
-        var context = this.ui.canvas.context();
-        var cx = x + this.ui.baraja.ancho()/2;
-        var cy = y + this.ui.baraja.alto()/2;
+    private dibujarCartas(index: number, x: number , y: number): void {
+        var i: number;
+        var context = ui.canvas.context();
+        var cx = x + ui.baraja.ancho()/2;
+        var cy = y + ui.baraja.alto()/2;
         for (i = 0 ; i < this.ganadas[index]; i++) {
             var giro;
             if (this.giros[i] != null) {
@@ -603,24 +645,23 @@ class GGanadas {
             context.translate(cx , cy);
             context.rotate((Math.PI / 180) * giro);
             context.translate(-cx , - cy);
-            context.drawImage(this.ui.baraja.reverso , x , y);
+            context.drawImage(ui.baraja.reverso , x , y);
             context.translate(cx , cy);
             context.rotate(-(Math.PI / 180) * giro);
             context.translate(-cx , - cy);
         }
     }
 
-    addCartas(nombre , numCartas) {
-        var i;
-        for (i = 0; i < 2; i++) {
+    public addCartas(nombre: string , numCartas: number): void {
+        for (var i = 0; i < 2; i++) {
             if (this.parejas[i][0] === nombre || this.parejas[i][1] === nombre) {
                 this.ganadas[i] += numCartas;
             }
         }
     }
 
-    puntoMueve(nombre) {
-        var punto;
+    public puntoMueve(nombre: string): any {
+        var punto: any;
         if (this.parejas[0][0] === nombre || this.parejas[0][1] === nombre) {
             punto = this.obtenerPunto(0);
         }
@@ -636,11 +677,10 @@ class GGanadas {
      * @param {*} x 
      * @param {*} y 
      */
-    click(x , y) {
-        var i ;
-        for (i = 0; i < 2; i++) {
+    public click(x: number , y: number): number {
+        for (var i = 0; i < 2; i++) {
             if (this.ganadas[i] > 0) {
-                if (this.zonas[i].estaDentro(x / this.ui.canvas.escala() , y / this.ui.canvas.escala())) {
+                if (this.zonas[i].estaDentro(x / ui.canvas.escala() , y / ui.canvas.escala())) {
                     return i;
                 } 
             }
@@ -649,13 +689,29 @@ class GGanadas {
     }
 }
 
-class UI {
+export class UI {
+    public baraja: GBaraja; // Baraja con las imágenes de las cartas
+    public canvas: MiCanvas; // Canvas
+    public baza: GBaza; // Baza actual
+    public mazo: GMazo; // Mazo. Cartas en el centro de la mesa
+    public ganadas: GGanadas; // Cartas ganadas por las parejas.
+    public jugadores: Array<GJugador>; // Array de jugadores
+    public verde: HTMLImageElement; // Luz verde
+    public roja: HTMLImageElement; // Luz roja
+    private gris: HTMLImageElement; // Luz gris
+    public animaciones: Array<Animacion>; // Array de animaciones en curso
+    public sounds: Array<HTMLAudioElement>; // Array de sonidos
+    public chupito: Chupito; // Chupito
+
     constructor() {
+    }
+
+    public primerInit(): void {
         this.baraja = new GBaraja();
         this.canvas = new MiCanvas();
-        this.baza = new GBaza(this);
-        this.mazo = new GMazo(this);
-        this.ganadas = new GGanadas(this);
+        this.baza = new GBaza();
+        this.mazo = new GMazo();
+        this.ganadas = new GGanadas();
         this.jugadores = [];
         this.verde = new Image();
         this.verde.src = '../client/img/Luz-verde.png';             
@@ -668,12 +724,13 @@ class UI {
         this.sounds[0] = new Audio('../client/img/playcard.mp3');
         this.sounds[1] = new Audio('../client/img/error.mp3');
         this.chupito = new Chupito();
+        setInterval(this.parpadeo , 600);    // Arranco el timer. Un solo timer para todas las partidas
     }
 
     /**
      * Aqui se inicializa todo lo necesario cuando comienza una partida (evento NuevaPartida)
      */
-    init() {
+    public init(): void {
         this.animaciones = [];
         this.baza.init();
         this.mazo.init();
@@ -686,19 +743,18 @@ class UI {
     /**
      * Cuando comienza un coto nuevo (Evento ComienzaPartida)
      */
-    initCompleto() {
+    public initCompleto(): void {
         this.jugadores = [];
         this.init();
     }
 
-    crearJugador(nombre, posicion) {
-        var jugador = new GJugador(this, nombre, posicion);
+    public crearJugador(nombre: string, posicion: string): GJugador {
+        var jugador = new GJugador(nombre, posicion);
         this.jugadores.push(jugador);
         return jugador;
     }
 
-    dibujar() {
-        ui = this;
+    public dibujar(): void {
         redibujar();
     }
 
@@ -710,11 +766,11 @@ class UI {
      * @param {*} x 
      * @param {*} y 
      */
-    click(x , y) {
-        var i,j, jugador, zona, miclick;
-        for (i = 0; i < this.jugadores.length; i++) {
+    public click(x:number , y: number): Click {
+        var jugador:GJugador , zona: Zona, miclick: Click;
+        for (var i = 0; i < this.jugadores.length; i++) {
             jugador = this.jugadores[i];
-            for (j = 0; j < jugador.zonas.length; j++) {
+            for (var j = 0; j < jugador.zonas.length; j++) {
                 zona = jugador.zonas[j];
                 if (zona.estaDentro(x / this.canvas.escala() , y / this.canvas.escala())) {
                     if (jugador.visible) {
@@ -734,9 +790,8 @@ class UI {
      * Devuelve en que posición (arriba, abajo...) está el jugador cuyo nombre se pasa como parametro.
      * @param {*} nombre - nombre del jugador
      */
-    posicion(nombre) {
-        var i;
-        for(i = 0; i < this.jugadores.length; i++) {
+    public posicion(nombre: string): string {
+        for(var i = 0; i < this.jugadores.length; i++) {
             if (this.jugadores[i].nombre === nombre) {
                 return this.jugadores[i].posicion;
             }
@@ -744,9 +799,8 @@ class UI {
         return null;
     }
 
-    indice(nombre) {
-        var i;
-        for(i = 0; i < this.jugadores.length; i++) {
+    public indice(nombre: string): number {
+        for(var i = 0; i < this.jugadores.length; i++) {
             if (this.jugadores[i].nombre === nombre) {
                 return i;
             }
@@ -754,30 +808,30 @@ class UI {
         return null;
     }
 
-    ponerTurno(jugador) {
+    public ponerTurno(jugador: GJugador): void {
         this.quitarTurno();
         jugador.turno = true;
         jugador.luzVerde = false;
     }
 
-    quitarTurno() {
+    public quitarTurno(): void {
         this.jugadores.forEach(jugador => {
             jugador.turno = false;
         });
     }
 
-    parpadeo() {
+    public parpadeo(): void {
         var context = ui.canvas.context();
-        var i , jugador , mantener = false;
-        for (i = 0; i < ui.jugadores.length; i++) {
+        var jugador: GJugador , mantener = false;
+        for (var i = 0; i < ui.jugadores.length; i++) {
             jugador = ui.jugadores[i];
             if (jugador.turno) {
                 if (!jugador.luzVerde) {
                     jugador.luzVerde = true;
-                    context.drawImage(jugador.ui.verde , jugador.luzx , jugador.luzy);
+                    context.drawImage(ui.verde , jugador.luzx , jugador.luzy);
                 } else {
                     jugador.luzVerde = false;
-                    context.drawImage(jugador.ui.gris , jugador.luzx , jugador.luzy);        
+                    context.drawImage(ui.gris , jugador.luzx , jugador.luzy);        
                 }
                 break;
             }
@@ -789,12 +843,12 @@ class UI {
      * @param {*} nombre - Nombre del jugador que recibe la carta
      * @param {*} carta - Carta que se mueve
      */
-    mueveMazoJugador(nombre, carta) {
+    public mueveMazoJugador(nombre: string, carta: Carta): void {
         console.log('mueveMazoJugador' , nombre, carta);
         var desde = this.mazo.puntoMueve();
         var indice = this.indice(nombre);
         var hasta = this.jugadores[indice].puntoMueve(this.jugadores[indice].cartas.length); // añadimos al final
-        var animacion = new Animacion(ui , this.baraja.reverso , desde , hasta);
+        var animacion = new Animacion(this.baraja.reverso , desde , hasta);
         animacion.xindice = indice;
         animacion.xcarta = carta;
         animacion.callback = ui.callbackMazoJugador;
@@ -808,7 +862,7 @@ class UI {
      * Añade la carta a las del jugador
      * @param {*} animacion 
      */
-    callbackMazoJugador(animacion) {
+    public callbackMazoJugador(animacion: Animacion): void {
         console.log("callbackMazoJugador" , animacion.xcarta ,animacion.xindice);
 //        ui.jugadores[animacion.xindice].cartas.push(animacion.xcarta);
         ui.jugadores[animacion.xindice].ponerCarta(animacion.xcarta);
@@ -820,12 +874,12 @@ class UI {
      * @param {*} carta - Carta que se juega
      * @param {*} indiceCarta - Indice de la carta en el array de cartas del jugador
      */
-    mueveJugadorBaza(nombre, carta, indiceCarta) {
+    public mueveJugadorBaza(nombre: string, carta: Carta, indiceCarta: number): void {
         console.log('mueveJugadorBaza' , nombre, carta, indiceCarta);
         var indice = this.indice(nombre);
         var desde = this.jugadores[indice].puntoMueve(indiceCarta);
         var hasta = this.baza.puntoMueve(nombre);
-        var animacion = new Animacion(ui , this.baraja.imagenes[carta.id] , desde , hasta);
+        var animacion = new Animacion(this.baraja.imagen(carta.id) , desde , hasta);
         animacion.xnombre = nombre;
         animacion.xcarta = carta;
         animacion.callback = ui.callbackJugadorBaza;
@@ -839,7 +893,7 @@ class UI {
      * Callback para el movimiento Jugador Baza. Añade la carta en la baza
      * @param {} animacion 
      */
-    callbackJugadorBaza(animacion) {
+    private callbackJugadorBaza(animacion: Animacion): void {
         console.log("callbackJugadorBaza" , animacion.xnombre ,animacion.xcarta);
         ui.baza.cartas.push(animacion.xcarta);
         ui.baza.nombres.push(animacion.xnombre);
@@ -850,13 +904,11 @@ class UI {
      * recogida. (Evento RecogeCartas)
      * @param {*} nombre - nombre de uno de los jugadores de la pareja que ha ganado la baza 
      */
-    mueveBazaGanadas(nombre) {
-        var i;
-//        for (i = 0; i < 4; i++) {
+    public mueveBazaGanadas(nombre: string): void {
         while (this.baza.nombres.length > 0) {
             var desde = this.baza.puntoMueve(this.baza.nombres[0]);
             var hasta = this.ganadas.puntoMueve(nombre);
-            var animacion = new Animacion(ui , this.baraja.imagenes[this.baza.cartas[0].id] , desde , hasta);
+            var animacion = new Animacion(this.baraja.imagen(this.baza.cartas[0].id) , desde , hasta);
             animacion.xnombre = nombre;
             animacion.callback = ui.callbackBazaGanadas;
             this.animaciones.push(animacion);
@@ -870,7 +922,7 @@ class UI {
      * Callback para el movimiento BazaGandas. Añade la carta en ui.ganadas.
      * @param {*} animacion 
      */
-    callbackBazaGanadas(animacion) {
+    private callbackBazaGanadas(animacion: Animacion): void {
         ui.ganadas.addCartas(animacion.xnombre , 1);
     }
 
@@ -883,12 +935,12 @@ class UI {
      * @param {*} indiceCarta - Indice del 7 en el array del jugador
      * @param {*} cartaTriunfo - Carta que recoge el jugador (la que marcaba el triunfo)
      */
-    mueveCambio7(nombre, carta, indiceCarta, cartaTriunfo) {
+    public mueveCambio7(nombre: string, carta: Carta, indiceCarta: number, cartaTriunfo: Carta): void {
         console.log("mueveCambio7" , nombre, carta, indiceCarta);
         var indice = this.indice(nombre);
         var desde = this.jugadores[indice].puntoMueve(indiceCarta);
         var hasta = this.mazo.puntoMueve();
-        var animacion = new Animacion(ui , this.baraja.imagenes[carta.id] , desde , hasta);
+        var animacion = new Animacion(this.baraja.imagen(carta.id) , desde , hasta);
         animacion.xnombre = nombre;
         animacion.xcarta = carta;
         animacion.xindice = indiceCarta;
@@ -904,14 +956,14 @@ class UI {
      * de vuelta
      * @param {*} animacion 
      */
-    callbackCambio7Ida(animacion) {
+    private  callbackCambio7Ida(animacion: Animacion): void {
         console.log("callbackCambio7Ida" , animacion);
         ui.mazo.triunfo = animacion.xcarta;
         // Hacer el movimiento de vuelta
         var indice = ui.indice(animacion.xnombre);
         var desde = ui.mazo.puntoMueve();
         var hasta = ui.jugadores[indice].puntoMueve(ui.jugadores[indice].cartas.length);
-        var animacion2 = new Animacion(ui , ui.baraja.imagenes[animacion.xcartaTriunfo.id] , desde , hasta);
+        var animacion2 = new Animacion(ui.baraja.imagen(animacion.xcartaTriunfo.id) , desde , hasta);
         animacion2.xnombre = animacion.xnombre;
         animacion2.xcarta = animacion.xcartaTriunfo;
         animacion2.xindice = animacion.xindice;
@@ -925,35 +977,42 @@ class UI {
      * mazo al jugador
      * @param {*} animacion 
      */
-    callbackCambio7Vuelta(animacion) {
+    private callbackCambio7Vuelta(animacion: Animacion): void {
         console.log("callbackCambio7Vuelta" , animacion);
         var indice = ui.indice(animacion.xnombre);
         ui.jugadores[indice].ponerCarta(animacion.xcarta);
     }
 }
 
-class Click {
-    constructor(nombre , carta , indice) {
+export class Click {
+    readonly nombre: string;
+    readonly carta: Carta;
+    readonly indice: number;
+
+    constructor(nombre: string , carta: Carta , indice: number) {
         this.nombre = nombre;
         this.carta = carta;
         this.indice = indice;
     }
 }
 
-/**
- * Animación. Mueve una imagen desde unas coordenadas de inicio, hasta unas de fin. 
- * this.velocidad - Velocidad en pixeles / milisegundo a la que se desplaza la imagen
- * this.ui - Interfaz grafico
- * this.imagen - Imagen que se mueve
- * this.inicio - Coordenadas del punto de partida
- * this.fin - Coordenadas del punto de destino
- * this.terminado - true cuando la imagen ha llegdo a su punto de destino.
- * this.a - distancia ente inicio y fin.
- */
-class Animacion {
-    constructor(ui, imagen , inicio, fin) {
+export class Animacion {
+    private velocidad: number; // Velocidad en pixeles / milisegundo a la que se desplaza la imagen
+    private imagen: HTMLImageElement; // Imagen que se mueve
+    private inicio: any; // Coordenadas del punto de partida
+    private fin: any; // Coordenadas del punto de destino
+    private milis: number;
+    private a: number;
+    public terminado: boolean; // cuando es true, la animación ha terminado (se ha llegado al punto de destino)
+    private actual: any; // posición actual de la imagen
+    public callback: any; // función de callback a la que se llama una vez que la animación ha finalizado
+    public xnombre: string; // Las propiedades que empiezan por x son valores que usan las funciones de callback
+    public xindice: number;
+    public xcarta: Carta;
+    public xcartaTriunfo: Carta;
+
+    constructor(imagen: HTMLImageElement , inicio: any, fin: any) {
         this.velocidad = 1.2;
-        this.ui = ui;
         this.imagen = imagen;
         this.inicio = inicio;
         this.fin = fin;
@@ -962,11 +1021,11 @@ class Animacion {
         this.terminado = false;
     }
 
-    dibujar() {
+    public dibujar(): void {
         if (this.terminado) {
             return;
         }
-        var context = this.ui.canvas.context();
+        var context = ui.canvas.context();
         var time = new Date();
         if (this.milis === 0) { // la primera vez
             this.milis = time.getTime();
@@ -984,8 +1043,7 @@ class Animacion {
         if (this.a < d) { // Si la distancia que avanzamos es mayor que lo que nos queda ya hemos llegado
             this.terminado = true;
             this.actual.x = this.fin.x; 
-            this.actual.y = this.fin.y;
-    
+            this.actual.y = this.fin.y;   
         }
         context.drawImage(this.imagen, this.actual.x , this.actual.y);
         this.a = Math.sqrt((this.fin.x - this.actual.x)*(this.fin.x - this.actual.x) + (this.fin.y - this.actual.y)*(this.fin.y - this.actual.y));
@@ -993,40 +1051,15 @@ class Animacion {
 }
 
 /**
- * Escribe un texto sobre el canvas 
- * @param {*} ctx 
- * @param {*} txt 
- * @param {*} font 
- * @param {*} x 
- * @param {*} y 
- */
-function drawTextBG(ctx, txt, font, x, y) {
-    /// lets save current state as we make a lot of changes        
-    ctx.save();
-    /// set font
-    ctx.font = font;
-    /// draw text from top - makes life easier at the moment
-    ctx.textBaseline = 'top';
-    // Letras en blanco.
-    ctx.fillStyle = '#ffffff';
-    /// draw text on top
-    ctx.fillText(txt, x, y);
-    /// restore original state
-    ctx.restore();
-}
-var ui;
-
-/**
  * Dibuja todo el canvas. Primero dibuja las animaciones, si las hay, y después
  * los objetos estáticos: Jugador, baza, mazo y cartas ganadas.
  */
 function redibujar() {
     ui.canvas.ponerFondo();
-    var i;
     // Dibujamos las animaciones primero
-    for (i = ui.animaciones.length - 1 ; i >= 0 ; i--) {
+    for (var i = ui.animaciones.length - 1 ; i >= 0 ; i--) {
         var animacion = ui.animaciones[i];
-        if (movimiento) {
+        if (main.movimiento) {
             if (!animacion.terminado) {
                 animacion.dibujar();
             } else { // animacion terminada. La función de callback hace las acciones posteriores al movimiento.
@@ -1049,36 +1082,37 @@ function redibujar() {
     // Si hay animaciones en marcha invocamos de nuevo redibujar para que continue.
     if (ui.animaciones.length > 0) {
         window.requestAnimationFrame(redibujar);
-//        setTimeout(redibujar , 20);
     }
 }
 
-class Chupito {
+export class Chupito {
+
+    private imgs: Array<HTMLImageElement>; // array de imágenes de chupito
+    public current: number; // Indice del array de imagenes que apunta a la imagen actual
 
     constructor() {
         this.imgs = [];
-        var i;
-        for (i = 0; i < 7; i++) {
+        for (var i = 0; i < 7; i++) {
             this.imgs[i] = new Image();
             this.imgs[i].src = '../client/img/chupito' + i + '.png';
         }
         this.current = -1;
     }
 
-    ponerChupito() {
-        if (nombreJugador.toLowerCase().indexOf("rafa") >= 0 ||
-            nombreJugador.toLowerCase().indexOf("ferruz") >= 0) { // Rafa siempre chupito blanco.
+    public ponerChupito(): void {
+        if (main.nombreJugador.toLowerCase().indexOf("rafa") >= 0 ||
+            main.nombreJugador.toLowerCase().indexOf("ferruz") >= 0) { // Rafa siempre chupito blanco.
             this.current = 1;
         } else {
             this.current =  Math.floor(Math.random() * 7);
         }
     }
 
-    quitarChupito() {
+    public quitarChupito(): void {
         this.current = -1;
     }
 
-    dibujar() {
+    public dibujar(): void {
         if (this.current >= 0) {
             var context = ui.canvas.context();
             var x = Math.floor(window.innerWidth - 210) / ui.canvas.escala();

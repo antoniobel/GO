@@ -2,3 +2,5 @@ node_modules/
 colyseusclient/
 logs/
 .vscode/
+client/dist/
+
