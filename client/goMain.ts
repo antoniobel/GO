@@ -232,6 +232,7 @@ export class GoMain {
     private close2(): void {
         document.getElementById("modalfin").style.display = "none"; // cerramos el diálogo fin partida
         if (main.manejador.partidaTerminada.finCoto) { // Al final del coto el servidor desconecta a todos. Limpiamos selects y empezamos.
+            ui.canvas.ponerFondo();
             main.vaciaSelect(document.getElementById("usuarios"));
             main.vaciaSelect(document.getElementById("pareja1"));
             main.vaciaSelect(document.getElementById("pareja2"));
