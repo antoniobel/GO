@@ -3,4 +3,6 @@ colyseusclient/
 logs/
 .vscode/
 client/dist/
+obsoletos/
+
 
