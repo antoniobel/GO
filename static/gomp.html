@@ -1,0 +1,134 @@
+<!--
+Copyright (C) 2020 Antonio Bel Puchol
+-->
+<html>
+    <head>
+        <title>Guiñote Olympic</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="css/estilo.css">
+        <link rel="icon" href="client/img/favicon32.png" type="image/png" />
+    </head>
+    <body>
+        <!-- Ventanas emergente -->
+        <div id="wizard" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span id="close1" class="close">&times;</span>
+                    <h2>
+                        <img src="client/img/favicon64.png" alt="Guiñote Olympic" style="float:left;width:32px;height:32px;">
+                        &emsp;Bienvenido a Guiñote Olympic
+                    </h2>
+                </div>
+                <div class="modal-body tab" id="w0">
+                    <p> <label>Nombre:</label>
+                        <input type="text" id="name" name="name" required> </p>
+                    <p> <input type="radio" id="rdcrear" name="opciones" value="crear"> 
+                        <label for="rdcrear">Crear una partida</label></p>
+                    <p> <input type="radio" id="rdunirse" name="opciones" value="unir" checked>
+                        <label for="rdunirse">Unirse a una partida</label></p>
+                    <p> <button id=siguiente class="button  button1" default>Siguiente</button>
+                    </p>
+                </div>
+                <div class="modal-body tab" id="w1">
+                    <p> <label id="lbnombre">Jugador: </label> <input type="text" id="nombreJugador1" disabled ></p>
+                    <p> <label>Nombre partida:</label>
+                        <input type="text" id="nombrepartida" required> </p>
+                    <p> <label>Partidas para ganar el coto:</label> 
+                        <input type="number" id="partidascoto" value="2" min="1" max="9" required> </p>
+                   <p> <input type="checkbox" id="cbpublico" name="opciones" value="publico" checked>
+                        <label for="cbpublico">Admite espectadores</label></p>
+                    <p> <button id=crear class="button  button1" >Crear partida</button>
+                        <button id=volver1 class="button  button1" style="position: absolute; right: 0;">Volver</button>
+                    </p>
+                </div>
+                <div class="modal-body tab" id="w2">
+                    <p> <label>Jugador: </label> <input type="text" id="nombreJugador2" readonly > </p>
+                    <p> <label>Selecciona partida:</label>
+                        <select id="partidas" > </select></p>
+                    <p> <button id=unirse class="button  button1" >Unirse a la partida</button> </p>
+                    <p>    <label>Jugadores:</label><br>
+                        <select id="usuarios2" size="8"></select>
+                    </p>
+                    <p> <label></label>
+                        <button id=volver2 class="button  button1" >Volver</button></p>
+                </div>
+                <div class="modal-body tab" id="w3">
+                    <p> <label>Jugador: </label> <input type="text" id="nombreJugador3" readonly > </p>
+                    <p> <label>Partida: </label> <input type="text" id="nombrePartida3" readonly > </p>
+                        <div class="column left" style="background-color:#ddd;">
+                            <label>Jugadores:</label><br>
+                            <select id="usuarios" size="8"></select>
+                        </div>
+                        <div class="column right" style="background-color:#ddd;">
+                            <label>Pareja 1:</label><br>
+                            <select id="pareja1" size="2"></select><br>
+                            <label>Pareja 2:</label><br>
+                            <select id="pareja2" size="2"></select><br>
+                            <div class="explain">
+                                Selecciona jugadores para formar las parejas. Los jugadores no seleccionados entrarán en la partida como espectadores.
+                            </div>              
+                        </div>
+                        <div class="centrar">
+                            <button id=comenzar class="button  button1" disabled>Comenzar partida</button>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <h3 style="text-align:left;">
+                        © Antonio Bel, 2020
+                        <span style="float:right;">
+                            Versión: 13.06.2020
+                        </span>
+                    </h3>
+                </div>
+            </div>    
+        </div>
+
+        <!-- Ventana emergente final de partida -->
+        <div id="modalfin" class="modal" >
+            <div class="modal-content" style="width: 30%">
+                <div class="modal-header">
+                    <span id="close2" class="close">&times;</span>
+                    <h2>Resultados de la partida</h2>
+                </div>
+                <div class="modal-body">
+                    <p id="linea1"></p>
+                    <p id="linea2"></p>
+                    <p id="linea3"></p>    
+                </div>
+            </div>
+        </div>
+        <!-- Ventana emergente para comunicar mensajes -->
+        <div id="modalmsg" class="modal" >
+            <div class="modal-content" style="width: 20%;font-size: 24px;">
+                <div class="modal-body">
+                    <p id="msg"></p>
+                </div>
+            </div>
+        </div>
+        <!-- Ventana emergente con botones si/no -->
+        <div id="modalsino" class="modal" >
+            <div class="modal-content" style="width: 20%">
+                <div class="modal-body">
+                    <p id="msgsino"></p>
+                    <button id="botonsi" class="button  button1" onclick="botonsi()">Si</button>
+                    <button id="botonno" class="button  button1" onclick="botonno()">No</button>
+                </div>
+            </div>
+        </div>
+        <!-- Ventana emergente para cantes -->
+        <div id="modalcante" class="modal2" >
+                <div id="divimage">
+                </div>
+        </div>
+        <!-- Canvas y botones del juego (superpuestos en el canvas) -->
+        <p id="puntos" class="puntos"></p>
+        <button id="cante" class="button  button1" disabled>Cantar   </button>
+        <button id="cambio7" class="button  button1" disabled>Cambiar 7</button>
+        <button id="ordenar" class="button  button1" disabled>Ordenar</button>
+        <button id="salir" class="button  button1" >Salir   </button>
+        <canvas id="canvas" width="600px" height="300px"></canvas>
+        <label id="programmode" hidden>multi</label>
+        <script type="text/javascript" src="client/dist/bundle.js"></script>       
+    </body>
+</html>
