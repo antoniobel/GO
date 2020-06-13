@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando de arranque
-CMD [ "node", "guinoteserver.js" ]
+CMD [ "ts-node", "guinoteserver.ts" ]
