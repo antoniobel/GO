@@ -4,7 +4,7 @@
 "use strict";
 
 import { Carta } from "./carta";
-import { main, ui } from "./goMain";
+import { main, ui , debug } from "./main";
 
 /**
  * Objeto que tiene las imágenes de todas las cartas
@@ -31,7 +31,7 @@ export class GBaraja {
             this.imagenes[i] = new Image();
             this.imagenes[i].addEventListener('load', () => {
                 this.leidas++;
-                if (this.leidas == 40) console.log('Todas las cartas leidas');
+                if (this.leidas == 40 && debug) console.log('Todas las cartas leidas');
            }, false);
            this.imagenes[i].src = '../client/img/' + i + '.png';             
         }
@@ -112,12 +112,12 @@ export class MiCanvas {
         if (alto < ancho) { // para pantallas alargadas (PC)
             var altoCartas = 190;
             this.scale = alto / (190 * ratio);
-            console.log(this.scale);
+            if (debug) console.log(this.scale);
             this.context().scale(this.scale , this.scale);    
         } else { // para pantallas tipo móvil
             var anchoCartas = 123;
             this.scale = ancho / (123 * ratio);
-            console.log(this.scale);
+            if (debug) console.log(this.scale);
             this.context().scale(this.scale , this.scale);    
         }
     }
@@ -359,7 +359,7 @@ export class GJugador {
         context.font = "30px Arial";
         this.longNombre = context.measureText(this.nombre).width;
         context.restore();
-        console.log("Longitud nombre: " , this.longNombre);
+        if (debug) console.log("Longitud nombre: " , this.longNombre);
     }
 
     private ponerImagen(carta: Carta , x: number , y: number): void {
@@ -844,7 +844,7 @@ export class UI {
      * @param {*} carta - Carta que se mueve
      */
     public mueveMazoJugador(nombre: string, carta: Carta): void {
-        console.log('mueveMazoJugador' , nombre, carta);
+        if (debug) console.log('mueveMazoJugador' , nombre, carta);
         var desde = this.mazo.puntoMueve();
         var indice = this.indice(nombre);
         var hasta = this.jugadores[indice].puntoMueve(this.jugadores[indice].cartas.length); // añadimos al final
@@ -863,7 +863,7 @@ export class UI {
      * @param {*} animacion 
      */
     public callbackMazoJugador(animacion: Animacion): void {
-        console.log("callbackMazoJugador" , animacion.xcarta ,animacion.xindice);
+        if (debug) console.log("callbackMazoJugador" , animacion.xcarta ,animacion.xindice);
 //        ui.jugadores[animacion.xindice].cartas.push(animacion.xcarta);
         ui.jugadores[animacion.xindice].ponerCarta(animacion.xcarta);
     }
@@ -875,7 +875,7 @@ export class UI {
      * @param {*} indiceCarta - Indice de la carta en el array de cartas del jugador
      */
     public mueveJugadorBaza(nombre: string, carta: Carta, indiceCarta: number): void {
-        console.log('mueveJugadorBaza' , nombre, carta, indiceCarta);
+        if (debug) console.log('mueveJugadorBaza' , nombre, carta, indiceCarta);
         var indice = this.indice(nombre);
         var desde = this.jugadores[indice].puntoMueve(indiceCarta);
         var hasta = this.baza.puntoMueve(nombre);
@@ -894,7 +894,7 @@ export class UI {
      * @param {} animacion 
      */
     private callbackJugadorBaza(animacion: Animacion): void {
-        console.log("callbackJugadorBaza" , animacion.xnombre ,animacion.xcarta);
+        if (debug) console.log("callbackJugadorBaza" , animacion.xnombre ,animacion.xcarta);
         ui.baza.cartas.push(animacion.xcarta);
         ui.baza.nombres.push(animacion.xnombre);
     }
@@ -936,7 +936,7 @@ export class UI {
      * @param {*} cartaTriunfo - Carta que recoge el jugador (la que marcaba el triunfo)
      */
     public mueveCambio7(nombre: string, carta: Carta, indiceCarta: number, cartaTriunfo: Carta): void {
-        console.log("mueveCambio7" , nombre, carta, indiceCarta);
+        if (debug) console.log("mueveCambio7" , nombre, carta, indiceCarta);
         var indice = this.indice(nombre);
         var desde = this.jugadores[indice].puntoMueve(indiceCarta);
         var hasta = this.mazo.puntoMueve();
@@ -957,7 +957,7 @@ export class UI {
      * @param {*} animacion 
      */
     private  callbackCambio7Ida(animacion: Animacion): void {
-        console.log("callbackCambio7Ida" , animacion);
+        if (debug) console.log("callbackCambio7Ida" , animacion);
         ui.mazo.triunfo = animacion.xcarta;
         // Hacer el movimiento de vuelta
         var indice = ui.indice(animacion.xnombre);
@@ -978,7 +978,7 @@ export class UI {
      * @param {*} animacion 
      */
     private callbackCambio7Vuelta(animacion: Animacion): void {
-        console.log("callbackCambio7Vuelta" , animacion);
+        if (debug) console.log("callbackCambio7Vuelta" , animacion);
         var indice = ui.indice(animacion.xnombre);
         ui.jugadores[indice].ponerCarta(animacion.xcarta);
     }

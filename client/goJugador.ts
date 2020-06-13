@@ -4,7 +4,7 @@
 "use strict";
 import { Room } from "../colyseusclient/colyseus";
 import { GoComun } from "./goComun";
-import { main, ui } from "./goMain";
+import { main, ui , debug } from "./main";
 
 /**
  * Clase que maneja todas las acciones para el jugador, en el lado del cliente
@@ -49,17 +49,17 @@ export class GoJugador extends GoComun {
             }
         }
         var jugador = ui.crearJugador(x[index], "abajo"); // jugador local siempre abajo
-        console.log(x[index], "abajo");
+        if (debug) console.log(x[index], "abajo");
         jugador.visible = true;
         index < 3 ? index++ : index = 0;
         ui.crearJugador(x[index], "derecha");
-        console.log(x[index], "derecha");
+        if (debug) console.log(x[index], "derecha");
         index < 3 ? index++ : index = 0;
         ui.crearJugador(x[index], "arriba");
-        console.log(x[index], "arriba");
+        if (debug) console.log(x[index], "arriba");
         index < 3 ? index++ : index = 0;
         ui.crearJugador(x[index], "izquierda");
-        console.log(x[index], "izquierda");
+        if (debug) console.log(x[index], "izquierda");
     }
 
     public canvasClicked(e: MouseEvent): void {
@@ -70,14 +70,14 @@ export class GoJugador extends GoComun {
             var miclick = ui.click(e.x, e.y);
             if (miclick != null) {
                 if (miclick.nombre === this.nombreJugador && miclick.carta != null) {
-                    console.log("Se ha pulsado " + miclick.carta);
+                    if (debug) console.log("Se ha pulsado " + miclick.carta);
                     main.enviarMensaje({ action: "EchoCarta", data: { jugador: this.nombreJugador, carta: miclick.carta.getId() } });
                     ui.sounds[0].play();
                 }
             } else { // ver si ha pulsado en la zona de cartas para revisar
                 var index = ui.ganadas.click(e.x, e.y);
                 if (index >= 0) {
-                    console.log("Se ha pulsado cartas ganadas " + index);
+                    if (debug) console.log("Se ha pulsado cartas ganadas " + index);
                     main.enviarMensaje({ action: "RevisionBaza", data: ui.jugadores[index].nombre });
                 }
             }

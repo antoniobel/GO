@@ -6,7 +6,7 @@
 import { Room } from "../colyseusclient/colyseus";
 import { GoComun } from "./goComun";
 import { GJugador } from "./goGraficos";
-import { main, ui } from "./goMain";
+import { main, ui } from "./main";
 
 /**
  * Clase que procesa todas las acciones para los espectadores
@@ -91,9 +91,7 @@ export class GoPublico extends GoComun {
 
     public cancelarPartida(): boolean {
         ui.canvas.fullScreen();
-        main.vaciaSelect(document.getElementById("usuarios"));
-        main.vaciaSelect(document.getElementById("pareja1"));
-        main.vaciaSelect(document.getElementById("pareja2"));
+        main.limpiarDatos();
         main.setConectado(false);
         document.getElementById("modalsino").style.display = "none";
         this.room.leave();
