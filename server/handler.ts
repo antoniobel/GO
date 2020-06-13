@@ -67,7 +67,7 @@ export class Handler extends Room {
         this.game = new GoGame(this);
     }
 
-    onCreate () {
+    onCreate (options: any) {
         this.setState(new State());
         this.pingContinue = true;
         this.pingFlag = true;
@@ -77,6 +77,9 @@ export class Handler extends Room {
         this.onMessage("*", (client, type, message) => { 
             this.recibeMensaje(client, message);
         });
+        this.setMetadata({partida: options.partida, pcoto: options.pcoto, publico: options.publico });
+        this.game.partidasCoto = parseInt(options.pcoto);
+        console.log("Partidas coto es " , this.game.partidasCoto);
     }
     
     onAuth(client: Client, options: any , req: http.IncomingMessage) {
@@ -85,6 +88,9 @@ export class Handler extends Room {
 
     onJoin (client: Client, options: any) {
         if (this.getClient(options.nombre) === undefined) { // Verificamos que no haya otro cliente con el mismo nombre
+            if (this.state.players.length === 4 && !this.metadata.publico) { // la partida no admite publico
+                throw new Error("La partida no admite espectadores.");
+            }
             this.state.createPlayer(client.sessionId , options.nombre);
             console.log('Cliente ' + options.nombre + ' conectado. sessionId: ' + client.sessionId);
             this.sendOne(options.nombre , { message: "Bienvenido " + options.nombre});
@@ -123,16 +129,14 @@ export class Handler extends Room {
             this.pingReceived(client);
             return;
         }
-        var d = new Date();
         if ('echo' in data) {
             if ('action' in data.echo) {
-                console.log(d.getTime() , "Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.action);
-                console.log(data.echo.data);
+                console.log("ECO" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.action , data.echo.data);
             } else {
-                console.log("Eco" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.data);
+                console.log("ECO" , this.getName(client.sessionId) , client.sessionId, ":", data.echo.data);
             }
         } else {
-            console.log(d.getTime() , "Mensaje recibido", this.getName(client.sessionId) , client.sessionId, ":", data);
+            console.log("RECIBO", this.getName(client.sessionId) , client.sessionId, ":", data);
             this.game.messageReceiver(this.getName(client.sessionId) , data);
         }
     }
