@@ -47,4 +47,4 @@ process.on("uncaughtException", (e) => {
   process.exit(1);
 });
 
-console.log(`Listening on http://localhost:${ port }`);
+console.log(`Guiñote server escuchando en http://localhost:${ port }`);
