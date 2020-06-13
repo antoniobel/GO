@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   devtool: 'source-map',
-  entry: './client/goMain.ts',
+  entry: './client/main.ts',
   module: {
     rules: [
       {
