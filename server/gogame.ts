@@ -22,7 +22,7 @@ export class GoGame {
     private log: Array<Array<string>>; // log de la partida. 4 elementos uno por jugador.
     private marcador: Array<number>; // dos elementos. partidas ganadas de una pareja y de otra
     private nombresPareja: Array<string>; // dos elementos. cada elemento contiene concatenados los nombres de la pareja. 
-    private partidasCoto: number; // Número de partidas necesarias para ganar un coto.
+    public partidasCoto: number; // Número de partidas necesarias para ganar un coto.
     private partidaTerminada: boolean; // flag que indica que la partida ha terminado. Se usa para las partidas de vueltas.
     private orden: Array<number>; // orden de juego (array con los indices del array de jugadores). 
     private publico: Array<Jugador>; // Array de clientes que entran como público en la partida.
@@ -115,10 +115,8 @@ export class GoGame {
      */
     runGame() {
         console.log("Comienzo juego");
-        this.partidasCoto = 2; // Esto habra que permitir que lo seleccione el jugador.
         this.enviarEvento('' , { action: "ComienzaPartida"});
         //Obtenemos los jugadores
-//        this.obtenerJugadores();
         this.enviarEvento('' , { action: "Parejas", data: [ [this.jugadores[0].nombre , this.jugadores[2].nombre ] , 
                                                             [ this.jugadores[1].nombre , this.jugadores[3].nombre ] ] });
         // Inicializamos el marcador
@@ -174,7 +172,6 @@ export class GoGame {
             this.orden.shift(); // quitamos el primer elemento
             this.orden.push(cero); // y lo ponermos el último.
         }
-        console.log("orden" , this.orden);
         //repartir cartas Se reparten de 3 en 3 y la acción se decala time para dar tiempo a que el 
         // cliente vea como se dan las cartas.
         var time = this.repartirCartas();
@@ -249,7 +246,7 @@ export class GoGame {
      */
     cartaJugada(nombre: string  , carta: Carta) {
         if (this.flagCartaJugada) {
-            console.log('Carta repetida. Me voy');
+            console.log('Carta repetida. Se ignora');
             return; // Es una carta repetida. Ya hay una en proceso. Prevenir incidente ticket #35
         }
         var index = this.getJugadorIndex(nombre);
@@ -293,7 +290,7 @@ export class GoGame {
     cartaJugadaOk(nombre: string) {
         this.sincroCartas.push(nombre);
         if (this.sincroCartas.length >= 4) {
-            console.log("Tengo 4 cartas ok");
+            console.log("Sincronización ok - Continuamos");
             this.turno++;
             if (this.turno === 2) {
                 this.enviarEvento('' , { action: "NoCanteCambio" });
@@ -326,7 +323,6 @@ export class GoGame {
 
     rondaTerminada2() {
         //hemos terminado ronda. evaluar baza , recoger cartas y pasar a la siguiente
-//        this.recogeCartas(this.indiceGanador);
         this.fijarOrden(this.indiceGanador);
         // Si la partida es de vueltas, aqui hay que mirar si ha terminado.
         if (this.vueltas == true && this.hayGanador()) {
@@ -477,7 +473,6 @@ export class GoGame {
             } else {
                 this.triunfo = carta;
             }
-//            this.triunfo = this.jugadores[index].cambia7(this.triunfo);
             var carta = this.baraja.cartas.pop(); // Quitamos la última carta, que marca el triunfo
             this.baraja.cartas.push(this.triunfo); // añadimos la carta cambiada (el 7) en la última posición.
             this.enviarEvento('' , { action: "HaCambiado7", data: {jugador: nombre , carta: carta.id}});
@@ -491,10 +486,10 @@ export class GoGame {
 
     enviarEvento(nombre: string  , mensaje: any) {
         if (this.handler != null) {
-            var d = new Date();
-            console.log(d.getTime() , "Enviar evento: ->" , nombre , "<-" , mensaje.action);
             if ('data' in mensaje) {
-                console.log(mensaje.data);
+                console.log("ENVIO ->" , nombre , "<-" , mensaje.action , mensaje.data);
+            } else {
+                console.log("ENVIO ->" , nombre , "<-" , mensaje.action);
             }
             if (nombre == '') { // No hay nombre. hacemos un sendAll
                 this.handler.sendAll(mensaje);
@@ -534,7 +529,6 @@ export class GoGame {
             carta = this.baraja.cogerCarta();
             this.jugadores[this.orden[j]].tomaCarta(carta);
                 this.handler.clock.setTimeout(this.enviar1Carta , time , this , this.jugadores[this.orden[j]].nombre , carta.id); 
-            //            this.enviarEvento(this.jugadores[this.orden[j]].nombre , { action: "Dar1Carta", data: carta.id });
             time += 800;
         }
     }
@@ -893,7 +887,6 @@ export class GoGame {
         var xcartas: Array<Array<number>> = [];
         var xcantes: Array<Array<number>> = [];
         var nCartas = this.baraja.cartas.length;
-//        this.baraja.cartas.length > 0 ? nCartas = this.baraja.cartas.length - 1 : nCartas = 0;
         var xmazo = { triunfo: this.triunfo.id , numCartas : nCartas};
         this.jugadores.forEach(jugador => {
             xnombres.push(jugador.nombre);
