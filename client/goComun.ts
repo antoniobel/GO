@@ -4,7 +4,7 @@
 "use strict";
 
 import { Room } from "../colyseusclient/colyseus";
-import { main, ui } from "./goMain";
+import { main, ui, debug } from "./main";
 import { Carta } from "./carta";
 
 /**
@@ -40,7 +40,7 @@ export class GoComun {
      */
     public procesaAction(action: string, data: any): void {
         if (action === "ComienzaPartida") {
-            document.getElementById("myModal").style.display = "none";
+            document.getElementById("wizard").style.display = "none";
             document.getElementById("modalfin").style.display = "none";
             (<HTMLButtonElement>document.getElementById("ordenar")).disabled = false;
             ui.canvas.fullScreen();
@@ -130,10 +130,8 @@ export class GoComun {
             document.getElementById("msg").innerHTML = "La partida ha sido cancelada por " + data;
             document.getElementById("modalmsg").style.display = "block"; // abrimos el diálogo
             setTimeout(function () {
-                this.ui.canvas.fullScreen();
-                main.vaciaSelect(document.getElementById("usuarios"));
-                main.vaciaSelect(document.getElementById("pareja1"));
-                main.vaciaSelect(document.getElementById("pareja2"));
+                ui.canvas.fullScreen();
+                main.limpiarDatos();
                 main.setConectado(false);
                 document.getElementById("modalmsg").style.display = "none";
                 main.abrirDialogoInicio();
@@ -216,7 +214,7 @@ export class GoComun {
     }
 
     protected cartaJugada(nombre: string, carta: Carta): void {
-        console.log('cartajugada', nombre, carta);
+        if (debug) console.log('cartajugada', nombre, carta);
         var indice = ui.indice(nombre);
         var jugador = ui.jugadores[indice];
         // quitar la carta y la zona
@@ -346,7 +344,7 @@ export class GoComun {
     }
 
     protected procesaSnapshot(data: any): void {
-        console.log('procesando snapshot');
+        if (debug) console.log('procesando snapshot');
         var xnombres = data.nombres;
         var xcartas = data.cartas;
         var xbaza = data.baza;
@@ -405,14 +403,13 @@ export class GoComun {
         } else {
             ui.quitarTurno(); // Nadie tiene el turno
         }
-        //    this.ui.jugadores[index].ponerTurno();
         if (xpuntos.vueltas === true) { // vamos de vueltas
             document.getElementById("puntos").style.display = "block";
             this.ponerPuntos(xpuntos);
         } else {
             document.getElementById("puntos").style.display = "none";
         }
-        console.log("Snapshot cargado");
+        if (debug) console.log("Snapshot cargado");
 
         ui.dibujar();
     }
