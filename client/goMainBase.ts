@@ -7,7 +7,7 @@ import { main, ui , debug , setDebug } from "./main";
 import { GoComun } from "./goComun";
 import { GoJugador } from "./goJugador";
 import { GoPublico } from "./goPublico";
-import { Client, Room } from "../colyseusclient/colyseus";
+import { RoomAvailable, Room } from "colyseus.js";
 
 export class goMainBase {
 
@@ -15,8 +15,7 @@ export class goMainBase {
     public nombreJugador: string;
     protected room: Room;
     protected conectado: boolean = false;
-    protected allRooms: Array<Room>;
-
+    protected allRooms: Array<RoomAvailable<any>>;
 
     constructor() {
         this.initBase();

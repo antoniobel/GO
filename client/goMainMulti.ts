@@ -4,8 +4,9 @@
 "use strict";
 
 import { goMainBase } from "./goMainBase";
-import { Client , Room } from "../colyseusclient/colyseus";
+import { Client , Room } from "colyseus.js";
 import { main, debug } from "./main";
+
 
 export class GoMainMulti extends goMainBase {
 
