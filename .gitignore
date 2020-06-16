@@ -4,5 +4,6 @@ logs/
 .vscode/
 client/dist/
 obsoletos/
+package-lock.json
 
 
