@@ -23,7 +23,7 @@ El programa Cliente está escrito en [Typescript](https://www.typescriptlang.org
 Para el desarrollo de Guiñote Olympic se ha utilizado [Visual Studio Code](https://code.visualstudio.com/) como [IDE](https://es.wikipedia.org/wiki/Entorno_de_desarrollo_integrado) y [Git](https://git-scm.com/) como [sistema de control de versiones](https://es.wikipedia.org/wiki/Control_de_versiones).
 
 ## Prueba Guiñote Olympic
-Puedes probar Guiñote Olympic en [http://go.abelp.net/gomp.html]. Sin embargo, este es mi servidor para uso personal, dispone de unos recursos limitados, y no puedo garantizar su disponibilidad. Si funciona, puedes usarlo, pero si tienes intención de jugar de forma regular te recomiendo que instales tu propio servidor, tal como se indica a continuación. Es sencillo.
+Puedes probar Guiñote Olympic en http://go.abelp.net/gomp.html. Sin embargo, este es mi servidor para uso personal, dispone de unos recursos limitados, y no puedo garantizar su disponibilidad. Si funciona, puedes usarlo, pero si tienes intención de jugar de forma regular te recomiendo que instales tu propio servidor, tal como se indica a continuación. Es sencillo.
 ## Galería de imágenes
 ![Diálogo de conexión. Identificación.](/assets/P1.png)
 Diálogo de conexión. Identificación
@@ -146,6 +146,11 @@ Donde go.server es el nombre del contenedor que vas a crear. Puede ser cualquier
 - Crea y lanza el contenedor con el comando:
         
         docker run -ti --name go.server -p 3000:3000 -d go.server
+### Instalación en una red doméstica
+Si instalas la aplicación servidor en un ordenador cualquiera conectado a un router, podrás acceder al mismo desde el propio ordenador o desde cualquier otro conectado a la misma red local (al mismo router), pero no podrás acceder desde el exterior. Es decir, tus amigos no podrán acceder al servidor. Para que puedan hacerlo sigue el siguiente procedimiento:
+1. Averigua cual es la dirección IP pública de tu router: La forma más sencilla es preguntárselo a Google. Desde el navegador pregúntale a Google 'Cual es mi IP pública' o algo así. Abre cualquiera de las respuestas que te da Google y anota el resultado. Tus amigos se tendrán que conectar al servidor con: http://*mi_ip_publica*:3000/gomp.html
+2. Pero el servidor no reside en el router sino en otro ordenador. El router debe saber a que ordenador debe pasar las peticiones que lleguen al puerto 3000. Para ello tienes que averiguar la dirección IP interna, en la red local, de tu ordenador. Si estás en Windows lanza un comando ipconfig. Te dirá cual es tu dirección IP, que normalmente será algo así: 192.168.x.x. Anota también la dirección privada de tu router que aparece donde dice 'Puerta de enlace predeterminada'. Normalmente será 192.168.1.1 o 192.168.0.1.
+3. Ahora debes acceder a la configuración de tu router, para abrir el puerto 3000 y asociar las peticiones a la dirección IP que has averiguado en el punto anterior. Hacer esto depende del router que tengas. Tendrás que buscar la información de tu proveedor a Internet (Movistar, Orange o el que sea). Normalmente los routers tienen una interface a la que se accede desde el navegador, con su dirección. Por ejemplo: http://192.168.1.1 Pero necesitarás la password de acceso que deberías tener en la documentación del router. 
 
 ## Licencia
 [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html)
