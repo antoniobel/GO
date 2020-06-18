@@ -4,14 +4,14 @@
 **Guiñote Olympic** está formado por una aplicación corriendo en un servidor, que tiene ciertos requisitos técnicos que se explican más adelante, y una aplicación cliente corriendo en el sistema de cada jugador. Los únicos requisitos para la aplicación cliente son disponer de un navegador Web, como Firefox, Chrome, Edge, o cualquier otro y una conexión a Internet.   
 
 ## Características de Guiñote Olympic
-- Servidor multipartida: El servidor puede atender un número indeterminado de partidas simultáneamente, solo limitaod por las características físicas del servidor y su conexión a Internet.
+- Servidor multipartida: El servidor puede atender un número indeterminado de partidas simultáneamente, solo limitado por las características físicas del servidor y su conexión a Internet.
 - Las partidas de Guiñote Olympic pueden admitir opcionalmente espectadores. Los espectadores no participan en la partida, pero pueden ver las cartas de algunos o todos los jugadores. La posibilidad de admitir espectadores se establece al crear la partida. 
-- El servidor impide movimientos ilegales. (Renuncions en el arrastre).
+- El servidor impide movimientos ilegales. (Renuncios en el arrastre).
 - Los jugadores pueden reconectarse a la partida, en caso de problemas de conexión a la red o de otro tipo.
 - Una partida, o coto, se juego a un número prefijado de victorias. Este número (frecuentemente 3) se establece al comienzo de la partida.
 - El jugador que inicia la partida selecciona las parejas de juego. El resto de personas conectadas a la partida pasan a ser espectadores (Si la partida los admite).
 - El programa cliente se adapta al tamaño de la pantalla mostrando imágenes claras y de una resolución adecuada.
-- Los movimientos de las cartas (al repartid, jugar, recoger cartas, etc.) son suaves y fluidos. En caso de sistemas con pocos recursos gráficos, los movimientos se pueden suprimir.
+- Los movimientos de las cartas (al repartir, jugar, recoger cartas, etc.) son suaves y fluidos. En caso de sistemas con pocos recursos gráficos, los movimientos se pueden suprimir.
 - La aplicación cliente no está optimizada para dispositivos móviles, aunque es utilizable.
 ## Características Técnicas
 ### Servidor
@@ -66,9 +66,9 @@ Inicialmente se muestra un diálogo donde el jugdor se identifica y selecciona s
 
 Si se quiere crear una partida se indica el nombre de la misma y una vez creada el jugador queda en espera de que se conecten el resto de jugadores. El creador de la partida también indica cuantas victorias se necesitan para ganar la partida o coto y si la partida admitirá o no espectadores.
 
-Si se quiere unir a una partida ya existente se selecciona el nombre de la partida a l que se quiere unir y el jugador queda en espera de que se conecten el resto de los jugadores o de que el jugador que creó la partida la comience.
+Si se quiere unir a una partida ya existente se selecciona el nombre de la partida al que se quiere unir y el jugador queda en espera de que se conecten el resto de los jugadores o de que el jugador que creó la partida la comience.
 
-Una vez que hay cuatro jugadores el creador de la partida puede seleccionar las parejas, seleccionandolas por nombre de jugador. Una vez las parejas están confeccionadas la partida puede comenzar, pulsando el botón Comenzar partida.
+Una vez que hay cuatro jugadores el creador de la partida puede formar las parejas, seleccionándolas por nombre de jugador. Una vez las parejas están confeccionadas la partida puede comenzar, pulsando el botón Comenzar partida.
 
 ### El juego
 Cuando comienza la partida cada jugador ve, en la parte inferior de la pantalla sus propias cartas, en la parte de arriba las cartas de su compañero y a los lados las cartas de la pareja contraria, convenientemente cubiertas todas, excepto las propias. A un lado de las cartas de cada jugador está su nombre y una pequeño indicador luminoso. Si el indicador está en rojo el jugador no tiene el turno de juego. Si el indicador parpadea en verde, es tu turno de juego.
@@ -78,7 +78,7 @@ Para jugar una carta se pulsa la carta elegida haciendo click en ella. Se oye un
 ### Los botones
 En la parte inferior derecha de la pantalla hay tres botones:
 - Ordenar: Este botón ordena las cartas por palos dejando las cartas de triunfo a la izquierda. Si se quiere que las cartas de triunfo queden a la derecha hay que pulsar la tecla de mayúsculas a la vez que se pulsa el botón ordenar. El botón se puede pulsar en cualquier momento.
-- Cambiar 7: Este botón está normalmente deshabilitado y sólo se puede pulsar cuando el jugador tiene el siete de triunfo y lo puede cambiar por la carta que marca el triunfo. En la ronda de juego número 4 (última ronda en que se toma una carta del mazo) ,si el botón está activo, el siete se cambia automáticamente aunque el jugador no pulse el botón. 
+- Cambiar 7: Este botón está normalmente deshabilitado y sólo se puede pulsar cuando el jugador tiene el siete de triunfo y lo puede cambiar por la carta que marca el triunfo. En la ronda de juego número 4 (última ronda en que se toma una carta del mazo), si el botón está activo, el siete se cambia automáticamente aunque el jugador no pulse el botón. 
 - Cantar: El botón se habilita cuando el jugador tiene un cante y es posible cantarlo. Cuando se pulsa el botón se cantan todos los cantes que tenga ese jugador. Los cantes nunca se producen automáticamente: El jugador debe pulsar siempre el botón para cantarlos.
 
 Adicionalmente, en la parte superior derecha de la pantalla hay otro botón, Salir. Si se pulsa este botón se finaliza la partida inmediatamente y todos los jugadores se desconectan del servidor.
@@ -94,22 +94,25 @@ Adicionalmente se pueden usar las siguientes combinaciones de teclas:
 
 ### Los espectadores
 Si la partida admite espectadores todos aquellos que se han conectado a la partida y no han sido incluidos en las dos parejas de juego se convierten automáticamente en espectadores. Los espectadores ven un tapete de juego igual al de los jugadores y ven las jugadas igual que los jugadores. Cuando se inicia la partida ven las cartas de todos los jugadores boca abajo, pero haciendo click en cualquier carta de cualquier jugador, ponen boca arriba las cartas de ese jugador. 
+
+Los espectadores pueden usar el botón ordenar, para ordenar las cartas de todos los jugadores que están descubiertas. Esta acción sólo afecta al contenido de su pantalla. Cada uno de los jugadores reales no ven afectadas las posiciones de sus cartas.
+
 ## Guiñote Olympic con una sola partida
-Si utilizas tu servidor privado de Guiñote Olympic para jugar una sola partida cada vez existe un procedimiento de conexión simplificado que acorta el diálogo de conexión y hace que todos los jugadores se conecten a la misma partida. Se accede con la URL **http://*dirección_del_servidor*/go.html**. Solo cambia el diálogo de conexión inicial, que es el siguiente: 
+Si utilizas tu servidor privado de Guiñote Olympic para jugar una sola partida cada vez existe un procedimiento de conexión simplificado que acorta el diálogo de conexión y hace que todos los jugadores se conecten a la misma partida, sin necesidad de indicar un nombre de partida. Se accede con la URL **http://*dirección_del_servidor*/go.html**. Solo cambia el diálogo de conexión inicial, que es el siguiente: 
 
 ![Diálogo inicial para una sola partida.](/assets/P12.png)
 Diálogo inicial para una sola partida.
 
-No es necesario indica ningún nombre de partida y una vez conectado, cualquier jugador puede iniciar la partida. Una vez iniciada la partida el juego es exactamente el mismo.
+No es necesario indicar ningún nombre de partida y una vez conectado, cualquier jugador puede iniciar la partida. Una vez iniciado, el juego es exactamente el mismo que el descrito anteriormente.
 
 ## Problemas más frecuentes
 Guiñote Olympic ha sido probado de forma bastante extensa y en su estado actual no presenta problemas conocidos. No obstante, en ocasiones se presentan situaciones problemáticas, algunas de las cuales se describen a continuación:
 - Los indicadores luminosos de los cuatro jugadores están en rojo: Guiñote Olympic tiene un mecanismo de sincronización entre los jugadores. Después de que un jugador juega una carta, el servidor notifica a todos los jugadores la carta que se ha jugado y todos los programas clientes envían una confirmación de que se ha recibido el mensaje. Si el servidor no da paso al siguiente jugador es porque le falta la confirmación de alguno de los jugadores, bien debido a que alguno se ha desconectado o bien porque temporalmente no contesta. Si ocurre ésto último, normalmente la situación se recupera por si sóla. 
 - Los cuatro jugadores han jugado sus cartas, que están en el tapete, pero éstas no se recogen: Exactamente la misma causa que la indicada anteriormente.
-- Pulso en una carta, pero esta no sale: En primer lugar asegúrate de que es tu turno. Si el indicativo luminoso no parpadea en verde no tienes el turno, aunque pienses lo contrario. Si es tu turno, puede indicar un problema de conexión: Cuando el jugador pulsa una carta, ésta se envia al servidor y éste la valida. Si es una carta válida el servidor contesta y el programa cliente muestra la carta en la pantalla. Si no se muestra es debido a un problema temporal, normalmente, o permanente de conexión de ese jugador.
+- Pulso en una carta, pero esta no sale: En primer lugar asegúrate de que es tu turno. Si el indicativo luminoso no parpadea en verde no tienes el turno, aunque pienses lo contrario. Si es tu turno, puede indicar un problema de conexión: Cuando el jugador pulsa una carta, ésta se envia al servidor para que la velide. Si es una carta válida el servidor contesta y el programa cliente muestra la carta en la pantalla. Si no se muestra es debido a un problema temporal, normalmente, o permanente de conexión de ese jugador.
 - Intento jugar una carta en el arrastre, se oye un ruido extraño y la carta no sale: El ruido extraño indica que estás jugando una carta inválida. ¡El servidor no deja jugar un renuncio!. Prueba con otra carta.
 
-Para los problemas de conexión se recomienda desconectarse y volver a conectarse. Para desconectar se puede usar F5 en el navegador, que reinicia el programa del cliente. También se puede cerrar la pestaña del navegador o el navegador completo y reconectarse a la partida siguiendo el procedimiento de conexión habitual.
+Si los problemas de comunicacion, como los descritos en los tres primeros puntos anteriores, persisten, se recomienda desconectarse y volver a conectarse. Para desconectar se puede usar F5 en el navegador, que reinicia el programa del cliente. También se puede cerrar la pestaña del navegador o el navegador completo y reconectarse a la partida siguiendo el procedimiento de conexión habitual. Siempre es posible reconectarse a la partida, sea cual sea la situación.
 
 ## Instalación
 La instalación del servidor Guiñote Olympic es relativamente sencilla, aunque es necesario instalar software adicional, en particular Node.js. No importa cual sea el Sistema Operativo que use el servidor. 
@@ -135,6 +138,8 @@ Cuando el servidor se inicia correctamente emite el mensaje:
 
 Una vez que aparece este mensaje, el servidor admite conexiones en el puerto 3000. Abre un navegador web y accede a la página inicial: [http://localhost:3000/gomp.html](http://localhost:3000/gomp.html).
 
+El servidor usa el puerto 3000, pero puede modificarse para que use cualquier otro puerto que se desee. Se puede modificar el puerto directamente en el archivo guinoteserver.ts, o bien, en la instalación con Docker que se explica a continuación mapeando el puerto 3000 de la aplicación a cualquier otro.
+
 ### Instalación con Docker
 Para ejecutar el servidor de Guiñote Olympic en un contenedor Docker sigue los siguientes pasos (Después de ejecutar el npm install y npx webpack):
 - [Instala Docker](https://docs.docker.com/get-docker/) en tu sistema.
@@ -147,7 +152,7 @@ Donde go.server es el nombre del contenedor que vas a crear. Puede ser cualquier
         
         docker run -ti --name go.server -p 3000:3000 -d go.server
 ### Instalación en una red doméstica
-Si instalas la aplicación servidor en un ordenador cualquiera conectado a un router, podrás acceder al mismo desde el propio ordenador o desde cualquier otro conectado a la misma red local (al mismo router), pero no podrás acceder desde el exterior. Es decir, tus amigos no podrán acceder al servidor. Para que puedan hacerlo sigue el siguiente procedimiento:
+Si instalas la aplicación servidor en un ordenador cualquiera conectado a un router, podrás acceder a la misma desde el propio ordenador o desde cualquier otro conectado a la misma red local (al mismo router), pero no podrás acceder desde el exterior. Es decir, tus amigos no podrán acceder al servidor. Para que puedan hacerlo sigue el siguiente procedimiento:
 1. Averigua cual es la dirección IP pública de tu router: La forma más sencilla es preguntárselo a Google. Desde el navegador pregúntale a Google 'Cual es mi IP pública' o algo así. Abre cualquiera de las respuestas que te da Google y anota el resultado. Tus amigos se tendrán que conectar al servidor con: http://*mi_ip_publica*:3000/gomp.html
 2. Pero el servidor no reside en el router sino en otro ordenador. El router debe saber a que ordenador debe pasar las peticiones que lleguen al puerto 3000. Para ello tienes que averiguar la dirección IP interna, en la red local, de tu ordenador. Si estás en Windows lanza un comando ipconfig. Te dirá cual es tu dirección IP, que normalmente será algo así: 192.168.x.x. Anota también la dirección privada de tu router que aparece donde dice 'Puerta de enlace predeterminada'. Normalmente será 192.168.1.1 o 192.168.0.1.
 3. Ahora debes acceder a la configuración de tu router, para abrir el puerto 3000 y asociar las peticiones a la dirección IP que has averiguado en el punto anterior. Hacer esto depende del router que tengas. Tendrás que buscar la información de tu proveedor a Internet (Movistar, Orange o el que sea). Normalmente los routers tienen una interface a la que se accede desde el navegador, con su dirección. Por ejemplo: http://192.168.1.1 Pero necesitarás la password de acceso que deberías tener en la documentación del router. 
@@ -165,13 +170,13 @@ Por eso, me encontré pensando en desarrollar una alternativa propia. El objetiv
 
 El resultado es **Guiñote Olympic**. El camino comenzó descubriendo que [Node.js](https://nodejs.org/en/) podía ser el entorno ideal para este tipo de problemas, continuó descubriendo que alguien ya había pensado en casi todos los problemas que había que resolver para hacer un juego (cualquier juego) y había escrito [Colyseus](https://colyseus.io/) y que existía un lenguaje de programación, Javascript, que yo conocía, un poco, pero más bien poco, que daba soporte a todo esto.
 
-En tres o cuatro semanas, había un versión inicial que comenzamos a probar, el equipo habitual, con aciertos y algunos errores. Aunque la secuencia de juego ha funcionado siempre bien (estaba, en cierta forma inspirada en el juego que desarrollé en Java) el factor de la red como un elemento extraño entre el servidor y los clientes añade complejidad y dificulta la localización de los errores. 
+En tres o cuatro semanas, había un versión inicial que comenzamos a probar, el equipo habitual. Había cosas que funcionaban bastante bien, y otras, menos bien. Aunque la secuencia de juego ha funcionado siempre bien (estaba, en cierta forma inspirada en el juego que desarrollé en Java) el factor de la red como un elemento extraño entre el servidor y los clientes añade complejidad y dificulta la localización de los errores. 
 
-Con paciencia y tiempo, del que la pandemia nos ha proporcionado cantidades abundantes, el programa ha ido mejorando, añadiendo funcionalidades, mejorando la programación, incluyendo el cambio de Javascript a Typescript (que tiene un agradable regustillo a Java) y otras mejoras técnicas importantes.
+Con paciencia y tiempo, que la pandemia nos ha proporcionado cantidades abundantes, el programa ha ido mejorando, se han añadido funcionalidades, mejorado la programación, incluyendo el cambio de Javascript a Typescript (que tiene un agradable regustillo a Java) y otras mejoras técnicas importantes.
 
 Y cada viernes, Angel, Antonio, Jesús, José Luis, Juanra, Rafa y un servidor hemos probado con entusiasmo el juego, 
 hemos maldecido cuando el servidor se caía, se atascaba o cuando la otra pareja cantaba las cuarenta, aunque cada vez se caía y se atascaba menos, aunque ellos, malditos, seguían cantando las cuarenta...
 
-El resultado final es el que aquí tienes. Espero que disfrutes tanto como yo he disfrutado programando, y jugando.
+El resultado final es el que tienes aquí. Espero que disfrutes tanto como yo he disfrutado programando, y jugando.
 
 Antonio Bel, Junio 2020.
