@@ -25,37 +25,37 @@ Para el desarrollo de Guiñote Olympic se ha utilizado [Visual Studio Code](http
 ## Prueba Guiñote Olympic
 Puedes probar Guiñote Olympic en [http://go.abelp.net/gomp.html]. Sin embargo, este es mi servidor para uso personal, dispone de unos recursos limitados, y no puedo garantizar su disponibilidad. Si funciona, puedes usarlo, pero si tienes intención de jugar de forma regular te recomiendo que instales tu propio servidor, tal como se indica a continuación. Es sencillo.
 ## Galería de imágenes
-![Diálogo de conexión. Identificación.](/assets/p1.png)
+![Diálogo de conexión. Identificación.](/assets/P1.png)
 Diálogo de conexión. Identificación
 
-![Diálogo de conexión. Creación partida.](/assets/p2.png)
+![Diálogo de conexión. Creación partida.](/assets/P2.png)
 Diálogo de conexión. Creación de la partida.
 
-![Diálogo de conexión. Creación parejas y comienzo.](/assets/p3.png)
+![Diálogo de conexión. Creación parejas y comienzo.](/assets/P3.png)
 Diálogo de conexión. Creación de parejas y comienzo de la partida.
 
-![Diálogo de conexión. Unirse a una partida.](/assets/p4.png)
+![Diálogo de conexión. Unirse a una partida.](/assets/P4.png)
 Diálogo de conexión. Unirse a una partida.
 
-![Area de juego.](/assets/p5.png)
+![Area de juego.](/assets/P5.png)
 Area de juego.
 
-![Cantan 20.](/assets/p6.png)
+![Cantan 20.](/assets/P6.png)
 Cantan 20.
 
-![La partida ha terminado.](/assets/p7.png)
+![La partida ha terminado.](/assets/P7.png)
 La partida ha terminado.
 
-![La partida ha terminado.](/assets/p8.png)
+![La partida ha terminado.](/assets/P8.png)
 La partida ha terminado.
 
-![La partida de vueltas.](/assets/p9.png)
+![La partida de vueltas.](/assets/P9.png)
 La partida de vueltas.
 
-![Un jugador se desconecta.](/assets/p10.png)
+![Un jugador se desconecta.](/assets/P10.png)
 Un jugador se desconecta.
 
-![Un jugador se reconecta.](/assets/p11.png)
+![Un jugador se reconecta.](/assets/P11.png)
 Un jugador se reconecta.
 
 ## Cómo usar la aplicación cliente
@@ -97,7 +97,7 @@ Si la partida admite espectadores todos aquellos que se han conectado a la parti
 ## Guiñote Olympic con una sola partida
 Si utilizas tu servidor privado de Guiñote Olympic para jugar una sola partida cada vez existe un procedimiento de conexión simplificado que acorta el diálogo de conexión y hace que todos los jugadores se conecten a la misma partida. Se accede con la URL **http://*dirección_del_servidor*/go.html**. Solo cambia el diálogo de conexión inicial, que es el siguiente: 
 
-![Diálogo inicial para una sola partida.](/assets/p12.png)
+![Diálogo inicial para una sola partida.](/assets/P12.png)
 Diálogo inicial para una sola partida.
 
 No es necesario indica ningún nombre de partida y una vez conectado, cualquier jugador puede iniciar la partida. Una vez iniciada la partida el juego es exactamente el mismo.
