@@ -163,7 +163,7 @@ Encontramos una aplicación en internet que permitía el juego entre cuatro pers
 
 Por eso, me encontré pensando en desarrollar una alternativa propia. El objetivo era un juego que se pudiera jugar desde un navegador (sin tener que instalar nada), que permitiera a unos jugar y a otros ver, y que tuviera paciencia con los que piensan y con los que tienen malas conexiones.
 
-El resultado es **Guiñote Olympic**. El camino comenzó descubriendo que [Node.js](https://nodejs.org/en/) podía ser el entorno ideal para este tipo de problemas, continuó descubriendo alguien ya había pensado en casi todos los problemas que había que resolver para hacer un juego (cualquier juego) y había escrito [Colyseus](https://colyseus.io/) y que existía un lenguaje de programación, Javascript, que yo conocía, un poco, pero más bien poco, que daba soporte a todo esto.
+El resultado es **Guiñote Olympic**. El camino comenzó descubriendo que [Node.js](https://nodejs.org/en/) podía ser el entorno ideal para este tipo de problemas, continuó descubriendo que alguien ya había pensado en casi todos los problemas que había que resolver para hacer un juego (cualquier juego) y había escrito [Colyseus](https://colyseus.io/) y que existía un lenguaje de programación, Javascript, que yo conocía, un poco, pero más bien poco, que daba soporte a todo esto.
 
 En tres o cuatro semanas, había un versión inicial que comenzamos a probar, el equipo habitual, con aciertos y algunos errores. Aunque la secuencia de juego ha funcionado siempre bien (estaba, en cierta forma inspirada en el juego que desarrollé en Java) el factor de la red como un elemento extraño entre el servidor y los clientes añade complejidad y dificulta la localización de los errores. 
 
