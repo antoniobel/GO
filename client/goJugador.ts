@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Antonio Bel Puchol
  */
 "use strict";
-import { Room } from "../colyseusclient/colyseus";
+import { Room } from "colyseus.js";
 import { GoComun } from "./goComun";
 import { main, ui , debug } from "./main";
 

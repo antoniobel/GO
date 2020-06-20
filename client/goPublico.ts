@@ -3,7 +3,7 @@
  */
 "use strict";
 
-import { Room } from "../colyseusclient/colyseus";
+import { Room } from "colyseus.js";
 import { GoComun } from "./goComun";
 import { GJugador } from "./goGraficos";
 import { main, ui } from "./main";
