@@ -23,7 +23,7 @@ El programa Cliente está escrito en [Typescript](https://www.typescriptlang.org
 Para el desarrollo de Guiñote Olympic se ha utilizado [Visual Studio Code](https://code.visualstudio.com/) como [IDE](https://es.wikipedia.org/wiki/Entorno_de_desarrollo_integrado) y [Git](https://git-scm.com/) como [sistema de control de versiones](https://es.wikipedia.org/wiki/Control_de_versiones).
 
 ## Prueba Guiñote Olympic
-Puedes probar Guiñote Olympic en http://go.abelp.net/gomp.html. Sin embargo, este es mi servidor para uso personal, dispone de unos recursos limitados, y no puedo garantizar su disponibilidad. Si funciona, puedes usarlo, pero si tienes intención de jugar de forma regular te recomiendo que instales tu propio servidor, tal como se indica a continuación. Es sencillo.
+Puedes probar Guiñote Olympic en http://go.abelp.net/gomp.html. Sin embargo, este es mi servidor para uso personal, dispone de unos recursos limitados, y no puedo garantizar su disponibilidad. Si funciona, puedes usarlo, pero si tienes intención de jugar de forma regular te recomiendo que instales tu propio servidor, tal como se indica más adelante.
 ## Galería de imágenes
 ![Diálogo de conexión. Identificación.](/assets/P1.png)
 Diálogo de conexión. Identificación
